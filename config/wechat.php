@@ -70,10 +70,17 @@ return [
              * scopes：公众平台（snsapi_userinfo / snsapi_base），开放平台：snsapi_login
              * callback：OAuth授权完成后的回调页地址(如果使用中间件，则随便填写。。。)
              */
+<<<<<<< HEAD
             'oauth' => [
                 'scopes'   => array_map('trim', explode(',', env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_SCOPES', 'snsapi_userinfo'))),
                 'callback' => env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_CALLBACK', '/examples/oauth_callback.php'),
             ],
+=======
+            // 'oauth' => [
+            //     'scopes'   => array_map('trim', explode(',', env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_SCOPES', 'snsapi_userinfo'))),
+            //     'callback' => env('WECHAT_OFFICIAL_ACCOUNT_OAUTH_CALLBACK', '/examples/oauth_callback.php'),
+            // ],
+>>>>>>> 添加easy wechat
         ],
     ],
 
@@ -104,6 +111,7 @@ return [
     /*
      * 微信支付
      */
+<<<<<<< HEAD
     'payment' => [
         'default' => [
             'sandbox'            => env('WECHAT_PAYMENT_SANDBOX', false),
@@ -116,6 +124,20 @@ return [
         ],
         // ...
     ],
+=======
+    // 'payment' => [
+    //     'default' => [
+    //         'sandbox'            => env('WECHAT_PAYMENT_SANDBOX', false),
+    //         'app_id'             => env('WECHAT_PAYMENT_APPID', ''),
+    //         'mch_id'             => env('WECHAT_PAYMENT_MCH_ID', 'your-mch-id'),
+    //         'key'                => env('WECHAT_PAYMENT_KEY', 'key-for-signature'),
+    //         'cert_path'          => env('WECHAT_PAYMENT_CERT_PATH', 'path/to/cert/apiclient_cert.pem'),    // XXX: 绝对路径！！！！
+    //         'key_path'           => env('WECHAT_PAYMENT_KEY_PATH', 'path/to/cert/apiclient_key.pem'),      // XXX: 绝对路径！！！！
+    //         'notify_url'         => 'http://example.com/payments/wechat-notify',                           // 默认支付结果通知地址
+    //     ],
+    //     // ...
+    // ],
+>>>>>>> 添加easy wechat
 
     /*
      * 企业微信
