@@ -4,10 +4,20 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Passport\HasApiTokens;
 
+/**
+ * Class User
+ *
+ * @package App
+ */
 class User extends Authenticatable
 {
-    use Notifiable;
+    const LOGIN_TYPE_PASSWORD = 1;
+    const LOGIN_TYPE_CODE = 2;
+
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -15,7 +25,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'mobile_no', 'password',
     ];
 
     /**
@@ -26,4 +36,14 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function findForPassport($login)
+    {
+        return $this->where('mobile_no', $login)->first();
+    }
+
+    public function validateForPassportPasswordGrant($password)
+    {
+        return $password == $this->password || Hash::check($password, $this->password);
+    }
 }

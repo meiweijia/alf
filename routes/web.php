@@ -11,6 +11,32 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('', function () {
+    $arr = [
+        [
+            'no' => 1,
+            'name' => '场地1',
+            'info' => [
+                'time' => '8',
+                'price' => 50
+            ]
+        ],
+        [
+            'no' => 2,
+            'name' => '场地2',
+            'info' => [
+                'time' => '8',
+                'price' => 50
+            ]
+        ],
+        [
+            'no' => 3,
+            'name' => '场地3',
+            'info' => [
+                'time' => '8',
+                'price' => 50
+            ]
+        ],
+    ];
+    return json_encode($arr);
 });
