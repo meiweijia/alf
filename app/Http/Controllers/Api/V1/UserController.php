@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\PassportToken;
@@ -17,7 +18,7 @@ class UserController extends Controller
 
     public function user(Request $request)
     {
-        return $request->user()->token();
+        return $request->user();
     }
 
     /**
@@ -151,11 +152,12 @@ class UserController extends Controller
     /**
      * 用户信息
      *
+     * @param Request $request
      * @return User[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
-    public function profile()
+    public function getProfile(Request $request)
     {
-        $user = User::with('profile')->get();
-        return $user;
+        return User::with('profile')->find(Auth::id());
     }
+
 }

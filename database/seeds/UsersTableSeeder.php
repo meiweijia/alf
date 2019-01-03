@@ -12,7 +12,8 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         factory(\App\Models\User::class, 10)->create()->each(function ($u) {
-            $u->profile()->save(factory(\App\Models\UserProfile::class)->make());
+            $u->profile()->save(factory(\App\Models\UserProfile::class)->make());//生成用户信息数据
+            //todo 生成订单
         });
     }
 }

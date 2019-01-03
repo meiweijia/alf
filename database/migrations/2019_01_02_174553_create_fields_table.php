@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateProductsTable extends Migration
+class CreateFieldsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateProductsTable extends Migration
      */
     public function up()
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('fields', function (Blueprint $table) {
             $table->increments('id');
-            $table->tinyInteger('weekday')->comment('周几 0周日 1周一 类推');
-            $table->tinyInteger('hour')->comment('几点 一个小时为单位');
-            $table->tinyInteger('no')->comment('场地编号');
-            $table->decimal('price')->comment('价格');
+            $table->integer('no')->unique()->comment('编号');
+            $table->string('name')->comment('场地名称');
+            $table->tinyInteger('type')->default(\App\Models\Field::FIELD_TYPE_SHUTTLECOCK)->comment('场地类型');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateProductsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('fields');
     }
 }

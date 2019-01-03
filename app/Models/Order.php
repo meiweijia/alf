@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    const STATUS_PENDING = 'pending';
-    const STATUS_APPLIED = 'applied';
-    const STATUS_SUCCESS = 'success';
-    const STATUS_FAILED = 'failed';
+    const STATUS_PENDING = '1';
+    const STATUS_APPLIED = '2';
+    const STATUS_SUCCESS = '3';
+    const STATUS_FAILED = '0';
+
+    const ORDER_TYPE_RESERVE = 1;
+    const ORDER_TYPE_RECHARGE = 2;
 
     public static $orderStatusMap = [
         self::STATUS_PENDING => '待支付',
@@ -56,7 +59,7 @@ class Order extends Model
         $prefix = date('YmdHis');
         for ($i = 0; $i < 10; $i++) {
             // 随机生成 6 位的数字
-            $no = $prefix.str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $no = $prefix . str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             // 判断是否已经存在
             if (!static::query()->where('no', $no)->exists()) {
                 return $no;
@@ -66,5 +69,10 @@ class Order extends Model
         \Log::warning(sprintf('find order no failed'));
 
         return false;
+    }
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

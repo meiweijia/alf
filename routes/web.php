@@ -38,5 +38,6 @@ Route::get('', function () {
             ]
         ],
     ];
+    return \App\Model\UserProfile::all();
     return json_encode($arr);
 });

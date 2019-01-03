@@ -17,10 +17,10 @@ class CreateOrderItmesTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('order_id');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->unsignedInteger('product_id');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->unsignedInteger('field_profile_id');
+            $table->foreign('field_profile_id')->references('id')->on('field_profiles')->onDelete('cascade');
             $table->unsignedInteger('amount');
-            $table->decimal('price', 10, 2);
+            $table->decimal('fees', 10, 2);
             $table->timestamps();
         });
     }

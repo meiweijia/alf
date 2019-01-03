@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user()->token();
+    return $request->user()->id;
 });
 
 
@@ -30,11 +30,15 @@ Route::middleware('auth:api')->get('/logout', function (Request $request) {
 //v1 路由
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
     Route::get('user', 'UserController@user');
-    Route::post('login', 'UserController@login');
+
 
     Route::group(['prefix' => 'user'], function () {
+        Route::post('user/login', 'UserController@login');
         Route::post('register', 'UserController@register');
-        Route::post('refresh_token', 'UserController@refreshToken');
+    });
+
+    Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
+        Route::get('get_profile', 'UserController@getProfile');
     });
 });
 
