@@ -4,15 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 
 use App\Http\Controllers\Controller;
-use App\User;
+use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\PassportToken;
-use Laravel\Passport\Passport;
-use League\OAuth2\Server\CryptKey;
-use PHPUnit\Util\Type;
 
 class UserController extends Controller
 {
@@ -47,8 +44,12 @@ class UserController extends Controller
         }
 
         $input = $request->all();
-        $input['password'] = bcrypt($input['password']);//随机密码
+        $input['password'] = bcrypt($input['password']);
         $user = User::create($input);
+        //新增用户 初始化信息表
+        $profile = new UserProfile(['level' => 1, 'balance' => 0.00]);
+        $user->profile()->save($profile);
+        return $this->getToken($request, $user->password);
     }
 
     /**
@@ -145,5 +146,16 @@ class UserController extends Controller
             'POST'
         );
         return \Route::dispatch($token);
+    }
+
+    /**
+     * 用户信息
+     *
+     * @return User[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function profile()
+    {
+        $user = User::with('profile')->get();
+        return $user;
     }
 }
