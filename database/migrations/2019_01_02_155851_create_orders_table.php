@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->string('no')->unique()->comment('订单号');
             $table->unsignedInteger('user_id')->comment('用户ID');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->decimal('total_amount')->comment('总金额');
+            $table->decimal('total_fees')->comment('总金额');
             $table->text('remark')->nullable();
             $table->dateTime('paid_at')->nullable()->comment('支付时间');
             $table->string('payment_method')->nullable()->comment('支付方式');

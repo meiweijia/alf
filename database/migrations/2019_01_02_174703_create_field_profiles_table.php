@@ -15,7 +15,7 @@ class CreateFieldProfilesTable extends Migration
     {
         Schema::create('field_profiles', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('field_id')->comment('用户ID');
+            $table->unsignedInteger('field_id')->comment('fieldID');
             $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
             $table->tinyInteger('weekday')->default(0)->comment('周几');
             $table->tinyInteger('time')->default(1)->comment('时间');

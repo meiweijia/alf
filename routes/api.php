@@ -39,10 +39,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
         Route::get('get_profile', 'UserController@getProfile');
+        Route::get('get_balance_logs', 'OrderController@getBalanceLogs');
+        Route::get('get_reserve_logs', 'OrderController@getReserveLogs');
     });
 
     Route::group(['prefix' => 'field'], function () {
         Route::get('get_fields', 'FieldController@getFields');
     });
+
 });
 #endregion

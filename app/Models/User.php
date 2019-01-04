@@ -72,10 +72,10 @@ class User extends Authenticatable
     /**
      * 用户订单 包含预定场地和充值的
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function order()
     {
-        return $this->hasOne(Order::class);
+        return $this->hasMany(Order::class);
     }
 }

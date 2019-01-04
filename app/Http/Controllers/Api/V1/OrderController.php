@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Libraries\Paginator;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\User;
@@ -19,31 +20,30 @@ class OrderController extends ApiController
      */
     public function getBalanceLogs(Request $request)
     {
-        $user_id = Auth::id();
-        $data = User::with(['order' => function ($query) {
-            $query->where('type', Order::ORDER_TYPE_RECHARGE);
-        }])->where('user_id', $user_id)
-            ->get();
+        $prePage = $request->input('per_page') ?? 10;
+        $data = $this->getOrder(Order::ORDER_TYPE_RECHARGE, $prePage);
         return $this->success($data);
     }
 
     /**
-     * 获取订单记录
+     * 获取订场记录
      *
      * @param Request $request
      * @return User[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
      */
-    public function getOrderLogs(Request $request)
+    public function getReserveLogs(Request $request)
+    {
+        $prePage = $request->input('per_page') ?? 10;
+        $data = $this->getOrder(Order::ORDER_TYPE_RESERVE, $prePage);
+        return $this->success($data);
+    }
+
+    private function getOrder($type, $perPage = 10)
     {
         $user_id = Auth::id();
-        $data = User::with([
-                'order' => function ($query) {
-                    $query->where('type', Order::ORDER_TYPE_RESERVE);
-                },
-                'order.items'
-            ]
-        )->where('user_id', $user_id)
-            ->get();
-        return $this->success($data);
+        $data = Order::query()->where('user_id', $user_id)
+            ->where('type', $type)
+            ->paginate($perPage);
+        return $this->paginate($data);
     }
 }
