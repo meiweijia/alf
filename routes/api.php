@@ -27,18 +27,22 @@ Route::middleware('auth:api')->get('/logout', function (Request $request) {
     return '退出登录成功';
 });
 
-//v1 路由
+#region V1路由
 Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
     Route::get('user', 'UserController@user');
 
 
     Route::group(['prefix' => 'user'], function () {
-        Route::post('user/login', 'UserController@login');
+        Route::post('login', 'UserController@login');
         Route::post('register', 'UserController@register');
     });
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
         Route::get('get_profile', 'UserController@getProfile');
     });
-});
 
+    Route::group(['prefix' => 'field'], function () {
+        Route::get('get_fields', 'FieldController@getFields');
+    });
+});
+#endregion

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
@@ -12,14 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\PassportToken;
 
-class UserController extends Controller
+class UserController extends ApiController
 {
     use PassportToken;
-
-    public function user(Request $request)
-    {
-        return $request->user();
-    }
 
     /**
      * 注册账号
@@ -50,7 +45,8 @@ class UserController extends Controller
         //新增用户 初始化信息表
         $profile = new UserProfile(['level' => 1, 'balance' => 0.00]);
         $user->profile()->save($profile);
-        return $this->getToken($request, $user->password);
+        $token = $this->getToken($request, $user->password);
+        return $this->success($token);
     }
 
     /**
@@ -85,7 +81,8 @@ class UserController extends Controller
             $password = $input['password'];
         }
 
-        return $this->getToken($request, $password);
+        $token = $this->getToken($request, $password);
+        return $this->success($token);
     }
 
     /**
@@ -146,7 +143,7 @@ class UserController extends Controller
             'api/oauth/token',
             'POST'
         );
-        return \Route::dispatch($token);
+        return $this->success(\Route::dispatch($token));
     }
 
     /**
@@ -157,7 +154,8 @@ class UserController extends Controller
      */
     public function getProfile(Request $request)
     {
-        return User::with('profile')->find(Auth::id());
+        $data = User::with('profile')->find(Auth::id());
+        return $this->success($data);
     }
 
 }

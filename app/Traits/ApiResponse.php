@@ -85,17 +85,8 @@ trait ApiResponse
      */
     private function message($message, $data = null, $status = true)
     {
-        if ($data) {
-            return $this->status($status, [
-                'message' => $message,
-                'data' => $data
-            ]);
-        } else {
-            return $this->status($status, [
-                'message' => $message
-            ]);
-        }
-
+        return $data ? $this->status($status, ['message' => $message, 'data' => $data]) :
+            $this->status($status, ['message' => $message]);
     }
 
     /**
@@ -108,13 +99,14 @@ trait ApiResponse
     }
 
     /**
+     * @param $data
      * @param string $message
      * @return mixed
      */
-    public function created($message = "created")
+    public function created($data = [], $message = "created")
     {
         return $this->setStatusCode(FoundationResponse::HTTP_CREATED)
-            ->message($message);
+            ->message($message, $data);
     }
 
     /**

@@ -21,6 +21,6 @@ class Field extends Model
      */
     public function profile()
     {
-        return $this->hasOne(FieldProfile::class);
+        return $this->hasMany(FieldProfile::class);
     }
 }

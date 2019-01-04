@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Api\ApiController;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
-class OrderController extends Controller
+class OrderController extends ApiController
 {
 
     /**
@@ -20,10 +20,11 @@ class OrderController extends Controller
     public function getBalanceLogs(Request $request)
     {
         $user_id = Auth::id();
-        return User::with(['order' => function ($query) {
+        $data = User::with(['order' => function ($query) {
             $query->where('type', Order::ORDER_TYPE_RECHARGE);
         }])->where('user_id', $user_id)
             ->get();
+        return $this->success($data);
     }
 
     /**
@@ -35,7 +36,7 @@ class OrderController extends Controller
     public function getOrderLogs(Request $request)
     {
         $user_id = Auth::id();
-        return User::with([
+        $data = User::with([
                 'order' => function ($query) {
                     $query->where('type', Order::ORDER_TYPE_RESERVE);
                 },
@@ -43,5 +44,6 @@ class OrderController extends Controller
             ]
         )->where('user_id', $user_id)
             ->get();
+        return $this->success($data);
     }
 }
