@@ -3,7 +3,7 @@
 namespace App\Traits;
 
 
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 trait Paginator
 {
