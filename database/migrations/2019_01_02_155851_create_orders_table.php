@@ -23,7 +23,7 @@ class CreateOrdersTable extends Migration
             $table->dateTime('paid_at')->nullable()->comment('支付时间');
             $table->string('payment_method')->nullable()->comment('支付方式');
             $table->string('payment_no')->nullable()->comment('支付方的回调单号');
-            $table->string('status')->default(\App\Models\Order::STATUS_PENDING)->commnet('订单状态');
+            $table->tinyInteger('status')->default(\App\Models\Order::STATUS_PENDING)->commnet('订单状态');
             $table->timestamps();
         });
     }
