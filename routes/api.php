@@ -35,6 +35,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
     Route::group(['prefix' => 'user'], function () {
         Route::post('login', 'UserController@login');
         Route::post('register', 'UserController@register');
+        Route::get('wechat_auth','UserController@wechatAuth');
     });
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\PassportToken;
+use Overtrue\Socialite\User as SocialiteUser;
+use EasyWeChatComposer\EasyWeChat;
 
 class UserController extends ApiController
 {
@@ -158,4 +160,20 @@ class UserController extends ApiController
         return $this->success($data);
     }
 
+    public function wechatAuth(Request $request)
+    {
+        // $validator = Validator::make($request->all(), [
+        //     'mobile_no' => 'required',
+        //     'type' => 'required',
+        // ]);
+        //
+        // if ($validator->fails()) {
+        //     return $this->error(['error' => $validator->errors()]);
+        // }
+        $app = app('wechat.official_account');
+        $res = $app->oauth->scopes(['snsapi_userinfo'])
+            ->setRequest($request)
+            ->redirect();
+        return $res;
+    }
 }

@@ -73,7 +73,7 @@ trait ApiResponse
      * @param bool $status
      * @return mixed
      */
-    public function failed($message, $code = FoundationResponse::HTTP_BAD_REQUEST, $status = false)
+    private function failed($message, $code = FoundationResponse::HTTP_BAD_REQUEST, $status = false)
     {
         return $this->setStatusCode($code)->message($message, null, $status);
     }
@@ -117,6 +117,16 @@ trait ApiResponse
     public function success($data, $message = 'success')
     {
         return $this->message($message, $data);
+    }
+
+    /**
+     * @param $data
+     * @param string $message
+     * @return mixed
+     */
+    public function error($data, $message = 'error')
+    {
+        return $this->setStatusCode(FoundationResponse::HTTP_BAD_REQUEST)->message($message, $data, false);
     }
 
     /**
