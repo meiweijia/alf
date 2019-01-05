@@ -23,11 +23,15 @@
     "autoload": {
         "classmap": [
             "database/seeds",
-            "database/factories"
+            "database/factories",
+            "app/Extends"
         ],
         "psr-4": {
             "App\\": "app/"
-        }
+        },
+        "files":[
+            "app/Extends/helper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
