@@ -88,7 +88,7 @@ class UserController extends ApiController
     /**
      * 获取token
      *
-     * @param $request
+     * @param Request $request
      * @param $password
      * @return mixed
      */
@@ -96,21 +96,21 @@ class UserController extends ApiController
     {
         $client = DB::table('oauth_clients')->where('password_client', 1)->first();
 
-        $request->request->add([
-            'grant_type' => 'password',
-            'client_id' => $client->id,
-            'client_secret' => $client->secret,
-            'username' => $request->input('mobile_no'),
-            'password' => $password,
-            'scope' => null,
+        $http = new \GuzzleHttp\Client;
+
+        $url = url('api/oauth/token');
+        $response = $http->post($url, [
+            'form_params' => [
+                'grant_type' => 'password',
+                'client_id' => $client->id,
+                'client_secret' => $client->secret,
+                'username' => $request->input('mobile_no'),
+                'password' => $password,
+                'scope' => null,
+            ],
         ]);
 
-        // Fire off the internal request.
-        $token = Request::create(
-            'api/oauth/token',
-            'POST'
-        );
-        return \Route::dispatch($token);
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
