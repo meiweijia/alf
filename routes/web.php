@@ -12,7 +12,7 @@
 */
 
 Route::get('', function () {
-    return $data = app(\App\Services\OrderService::class)->handleAppliedOrder();
+    return 404;
     // foreach ($data as $datum) {
     //     var_dump($datum->items->isEmpty());
     // }
