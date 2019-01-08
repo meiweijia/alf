@@ -3,72 +3,79 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Libraries\Wechat;
 use App\Models\FieldProfile;
-use App\Models\OrderItem;
 use App\Models\UserProfile;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Models\User;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class OrderController extends ApiController
 {
-
-    public function reserve(Request $request)
+    /**
+     * 订单
+     *
+     * @param Request $request
+     * @param OrderService $orderService
+     * @return Response
+     * @throws \App\Exceptions\InvalidRequestException
+     */
+    public function reserve(Request $request, OrderService $orderService)
     {
-        $user_id = Auth::id();
-
-        $pay_method = '';
-        //创建订单
-        $order = $this->create();
-
-        //订单场地信息写入
-        OrderItem::query()->insert([
-            'order_id' => $order->id,
-            'order_id' => $order->id,
-            'order_id' => $order->id,
-            'order_id' => $order->id,
+        $this->checkPar($request, [
+            'fees' => 'required',
+            'fields' => 'required',
         ]);
 
-        //预定时，把场地数量改为0，不再接受预定
-        FieldProfile::query()->where('id', '')->update(['amount' => 0]);
+        $fees = $request->input('fees');
 
-        //订单创建完成  把账户余额带出来
-        $balance = UserProfile::query()->where('user_id')->pluck('balance');
+        $fields = $request->input('fields');
 
-    }
-
-    public function recharge(Request $request)
-    {
-        $user_id = Auth::id();
-
-        $amount = $request->input('amount');
+        $field_arr = json_decode($fields, true);
 
         //创建订单
-        $order = $this->create();
+        $order = $orderService->store($fees, Order::ORDER_TYPE_RESERVE, $field_arr);
 
-        //支付成功更新账户余额
-        User::query()->where('user_id', $user_id)->increment('balance', $amount);
+        //订单创建完成  把账户余额带出来
+        $balance = UserProfile::query()->where('user_id', Auth::id())->pluck('balance')->first();
 
-        //累计充值 修改会员等级
+        $order->balance = $balance;
+
+        return $this->success($order);
     }
 
     /**
-     * 创建订单
+     * 充值
      *
-     * @return Order
+     * @param Request $request
+     * @param OrderService $orderService
+     * @return Response
+     * @throws \App\Exceptions\InvalidRequestException
      */
-    public function create()
+    public function recharge(Request $request, OrderService $orderService)
     {
-        $user_id = Auth::id();
+        $this->checkPar($request, [
+            'fees' => 'required',
+        ]);
 
+        $fees = $request->input('fees');
+
+        //创建订单
+        $order = $orderService->store($fees, Order::ORDER_TYPE_RECHARGE);
+
+        //生成微信支付配置项
+        $config = app(Wechat::class)->getPaymentConfig($order->no, $fees, '澳莱芙支付中心-余额充值');
+
+        return $config ? $this->success($config) : $this->error(null, '微信支付签名验证失败');
     }
 
     /**
      * 获取充值记录
      *
      * @param Request $request
-     * @return User[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     * @return Response
      */
     public function getBalanceLogs(Request $request)
     {
@@ -81,7 +88,7 @@ class OrderController extends ApiController
      * 获取订场记录
      *
      * @param Request $request
-     * @return User[]|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     * @return Response
      */
     public function getReserveLogs(Request $request)
     {
@@ -90,6 +97,13 @@ class OrderController extends ApiController
         return $this->success($data);
     }
 
+    /**
+     * 获取 order 表的记录
+     *
+     * @param $type
+     * @param int $perPage
+     * @return array
+     */
     private function getOrder($type, $perPage = 10)
     {
         $user_id = Auth::id();

@@ -17,6 +17,13 @@ class User extends Authenticatable
     const LOGIN_TYPE_PASSWORD = 1;//密码登录
     const LOGIN_TYPE_CODE = 2;//手机号+验证码登录
 
+    const TOTAL_RECHARGE_KEY = 'user:recharge:';
+
+    const USER_LEVEL_GEN = 1;
+    const USER_LEVEL_SILVER = 2;
+    const USER_LEVEL_GOLD = 3;
+    const USER_LEVEL_DIAMOND = 4;
+
     use HasApiTokens, Notifiable;
 
     /**
@@ -77,5 +84,19 @@ class User extends Authenticatable
     public function order()
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * 计算等级
+     *
+     * @param $total_fees
+     * @return int
+     */
+    public static function calcLevel($total_fees)
+    {
+        if ($total_fees > 2000) return self::USER_LEVEL_SILVER;
+        if ($total_fees > 5000) return self::USER_LEVEL_GOLD;
+        if ($total_fees > 10000) return self::USER_LEVEL_DIAMOND;
+        return self::USER_LEVEL_GEN;
     }
 }

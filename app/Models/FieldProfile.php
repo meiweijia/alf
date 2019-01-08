@@ -2,9 +2,17 @@
 
 namespace App\Models;
 
+use App\Exceptions\InvalidRequestException;
 use Illuminate\Database\Eloquent\Model;
 
 class FieldProfile extends Model
 {
-    //
+    public function decreaseStock($amount)
+    {
+        if ($amount < 0) {
+            throw new InvalidRequestException('场馆已经被选择');
+        }
+
+        return $this->newQuery()->where('id', $this->id)->where('stock', '>=', $amount)->decrement('stock', $amount);
+    }
 }

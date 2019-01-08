@@ -21,7 +21,9 @@ class CreateOrderItemsTable extends Migration
             $table->foreign('field_profile_id')->references('id')->on('field_profiles')->onDelete('cascade');
             $table->unsignedInteger('amount');
             $table->decimal('fees', 10, 2);
+            $table->tinyInteger('status')->default(0);
             $table->timestamps();
+            $table->dateTime('expires_at')->nullable();
         });
     }
 

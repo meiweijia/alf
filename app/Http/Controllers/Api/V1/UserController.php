@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 
 use App\Http\Controllers\Api\ApiController;
+use App\Libraries\Wechat;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
@@ -11,8 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\PassportToken;
-use Overtrue\Socialite\User as SocialiteUser;
-use EasyWeChatComposer\EasyWeChat;
 
 class UserController extends ApiController
 {
@@ -34,7 +33,7 @@ class UserController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return $this->error($validator->errors());
         }
 
         if (false) {
@@ -65,7 +64,7 @@ class UserController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 401);
+            return $this->error($validator->errors());
         }
 
         $input = $request->all();
@@ -160,20 +159,22 @@ class UserController extends ApiController
         return $this->success($data);
     }
 
+    /**
+     * 微信授权登录
+     *
+     * @param Request $request
+     * @return mixed
+     */
     public function wechatAuth(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'mobile_no' => 'required',
-        //     'type' => 'required',
-        // ]);
-        //
-        // if ($validator->fails()) {
-        //     return $this->error(['error' => $validator->errors()]);
-        // }
-        $app = app('wechat.official_account');
-        $res = $app->oauth->scopes(['snsapi_userinfo'])
-            ->setRequest($request)
-            ->redirect();
-        return $res;
+        $validator = Validator::make($request->all(), [
+            'thisurl' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error(['error' => $validator->errors()]);
+        }
+
+        return Wechat::authLogin($request);
     }
 }

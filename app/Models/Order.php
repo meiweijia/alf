@@ -11,12 +11,14 @@ class Order extends Model
     const STATUS_SUCCESS = '3';
     const STATUS_FAILED = '0';
 
-    const ORDER_TYPE_RESERVE = 1;
-    const ORDER_TYPE_RECHARGE = 2;
+    const ORDER_TYPE_RESERVE = 1;//订单类型 订场
+    const ORDER_TYPE_RECHARGE = 2;//订单类型 充值
+
+    const PAYMENT_TYPE_CASH = 'cash';//订单支付方式 现金 充值只能时这个
 
     public static $orderStatusMap = [
         self::STATUS_PENDING => '待支付',
-        self::STATUS_APPLIED => '待消费',
+        self::STATUS_APPLIED => '已支付',
         self::STATUS_SUCCESS => '已完成',
         self::STATUS_FAILED => '已过期'
     ];
@@ -69,6 +71,11 @@ class Order extends Model
         \Log::warning(sprintf('find order no failed'));
 
         return false;
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function items()
