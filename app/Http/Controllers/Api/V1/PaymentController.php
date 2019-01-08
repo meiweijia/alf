@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Redis;
 
 class PaymentController extends ApiController
 {
+    public function getWechatJssdkConfig()
+    {
+        $app = app('wechat.payment');
+        return $app->jssdk->buildConfig([
+            "chooseWXPay" //微信支付
+        ]);
+    }
+
     /**
      * @param Request $request
      * @return mixed

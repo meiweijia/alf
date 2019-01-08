@@ -56,6 +56,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
     Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
         Route::post('payment_by_balance', 'PaymentController@paymentByBalance');
         Route::post('payment_by_wechat', 'PaymentController@paymentByWechat');
+        Route::get('get_wechat_jssdk_config','PaymentController@getWechatJssdkConfig');
     });
     Route::any('payment/wechat_pay_notify', 'PaymentController@wechatPayNotify');//微信支付回调
 
