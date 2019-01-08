@@ -46,6 +46,7 @@ class OrderService
                     'field_profile_id' => $v['id'],
                     'amount' => 1,
                     'fees' => $v['fees'],
+                    'status' => 1,
                     'expires_at' => $day . ' ' . $hour . ':00:00'
                 ]);
                 $item->save();
