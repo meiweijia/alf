@@ -118,6 +118,6 @@ class Wechat
         $app = EasyWechat::officialAccount();
         return $app->oauth->scopes(['snsapi_userinfo'])
             ->setRequest($request)
-            ->redirect(url($request->input('thisurl')));
+            ->redirect($request->input('thisurl'));
     }
 }
