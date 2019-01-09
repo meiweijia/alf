@@ -11,4 +11,4 @@
 |
 */
 
-Route::get('','HomeController@wechat_serve');
+Route::any('', 'HomeController@wechat_serve');
