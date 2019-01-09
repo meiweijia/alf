@@ -28,19 +28,17 @@ class Wechat
     // 企业微信开放平台
     const WECHAT_TYPE_OPEN_WORK = 'open_work';
 
-    public function serve()
+    public function serve($name)
     {
         $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
-        $app->server->push(function ($message) use ($app) {
+        $app->server->push(function ($message) use ($name) {
             // $message['FromUserName'] // 用户的 openid
             // $message['MsgType'] // 消息类型：event, text....
-            $user = $app->user->get($message['FromUserName']);
-            Log::info('wechat_user',$user);
             switch ($message['MsgType']) {
                 case '':
                     switch ($message->Event) {
                         case 'subscribe':
-                            return new Text( '欢迎关注 澳莱芙');
+                            return new Text('欢迎关注 ' . $name);
                             break;
                     }
             }

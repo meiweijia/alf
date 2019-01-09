@@ -11,4 +11,4 @@
 |
 */
 
-Route::any('', 'HomeController@wechat_serve');
+Route::any('wechat/serve', 'WechatController@serve');
