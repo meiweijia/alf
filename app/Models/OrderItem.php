@@ -14,8 +14,8 @@ class OrderItem extends Model
         'expires_at',
     ];
 
-    public function field()
+    public function field_profile()
     {
-        $this->belongsTo(FieldProfile::class);
+        return $this->belongsTo(FieldProfile::class);
     }
 }

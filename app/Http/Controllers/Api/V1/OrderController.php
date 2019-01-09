@@ -118,6 +118,6 @@ class OrderController extends ApiController
         $this->checkPar($request, [
             'order_id' => 'required',
         ]);
-        return Order::query()->with(['items', 'items.field'])->find($request->input('order_id'));
+        return Order::query()->with(['items', 'items.field_profile'])->find($request->input('order_id'));
     }
 }
