@@ -176,7 +176,7 @@ class UserController extends ApiController
         return Wechat::authLogin($request);
     }
 
-    public function checkBindMobile($key)
+    public function checkBindMobile(Request $request, $key)
     {
         //TODO 添加微信验证中间件
         $user = Wechat::authUser();
@@ -191,6 +191,6 @@ class UserController extends ApiController
             $bind = 0;
         }
         $url = cache($key);
-        return redirect($url . '?bind=' . $bind);
+        return redirect($url . '?bind=' . $bind . '&code=' . $request->input('code') . '&state=' . $request->input('state'));
     }
 }
