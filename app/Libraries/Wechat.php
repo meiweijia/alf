@@ -81,6 +81,6 @@ class Wechat
         $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
         return $app->oauth->scopes(['snsapi_userinfo'])
             ->setRequest($request)
-            ->redirect($request->input('thisurl'));
+            ->redirect($request->input(url('thisurl')));
     }
 }
