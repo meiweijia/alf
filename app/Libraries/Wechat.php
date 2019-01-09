@@ -30,7 +30,7 @@ class Wechat
 
     public function serve()
     {
-        $app = app('wechat' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
+        $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
         $app->server->push(function ($message) use ($app) {
             // $message['FromUserName'] // 用户的 openid
             // $message['MsgType'] // 消息类型：event, text....
