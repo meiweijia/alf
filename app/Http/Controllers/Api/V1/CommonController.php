@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 
+use App\Facades\EasySms;
 use App\Http\Controllers\Api\ApiController;
 use App\Libraries\SMS;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class CommonController extends ApiController
 {
@@ -19,14 +20,23 @@ class CommonController extends ApiController
      */
     public function getCode(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->checkPar($request, [
             'mobile_no' => 'required'
         ]);
 
-        if ($validator->fails()) {
-            return $this->error(['error' => $validator->errors()]);
-        }
         $code = generate_code(4);
-        return cache([SMS::MOBILE_CODE_KEY . $request->input('mobile_no') => $code], Carbon::now()->addMinute(10)) ? $this->success(null) : $this->error(null);
+
+        $mobile_no = $request->input('mobile_no');
+
+        //TODO 这里稍微再封装一个SMS类
+        $result = EasySms::send($mobile_no, [
+            'content' => '您的验证码为: ' . $code,
+            'template' => 'SMS_129070037',
+            'data' => [
+                'code' => $code
+            ],
+        ]);
+
+        return cache([SMS::MOBILE_CODE_KEY . '_' . $mobile_no => $code], Carbon::now()->addMinute(5)) ? $this->success($code) : $this->error(null);
     }
 }
