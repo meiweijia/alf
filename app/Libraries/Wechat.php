@@ -48,6 +48,21 @@ class Wechat
     }
 
     /**
+     * 获取微信配置
+     *
+     * @return array|string
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getWechatJssdkConfig()
+    {
+        $app = EasyWechat::officialAccount();
+        return $app->jssdk->buildConfig([
+            "chooseWXPay" //微信支付
+        ], true);
+    }
+
+    /**
      * 获取支付信息配置
      *
      * @param $trade_no

@@ -11,4 +11,6 @@
 |
 */
 
+Route::any('','HomeController@index');
+
 Route::any('wechat/serve', 'WechatController@serve');

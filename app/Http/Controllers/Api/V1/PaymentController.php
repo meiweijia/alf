@@ -16,10 +16,7 @@ class PaymentController extends ApiController
 {
     public function getWechatJssdkConfig()
     {
-        $app = app('wechat.payment');
-        return $app->jssdk->buildConfig([
-            "chooseWXPay" //微信支付
-        ]);
+        return app(Wechat::class)->getWechatJssdkConfig();
     }
 
     /**
