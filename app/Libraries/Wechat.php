@@ -10,6 +10,8 @@ namespace App\Libraries;
 
 
 use Illuminate\Http\Request;
+use EasyWeChat\Kernel\Messages\Text;
+use Illuminate\Support\Facades\Log;
 
 class Wechat
 {
@@ -25,6 +27,29 @@ class Wechat
     const WECHAT_TYPE_WORK = 'work';
     // 企业微信开放平台
     const WECHAT_TYPE_OPEN_WORK = 'open_work';
+
+    public function serve()
+    {
+        $app = app('wechat' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
+        $app->server->push(function ($message) use ($app) {
+            // $message['FromUserName'] // 用户的 openid
+            // $message['MsgType'] // 消息类型：event, text....
+            $user = $app->user->get($message['FromUserName']);
+            Log::info('wechat_user',$user);
+            switch ($message['MsgType']) {
+                case '':
+                    switch ($message->Event) {
+                        case 'subscribe':
+                            return new Text( '欢迎关注 澳莱芙');
+                            break;
+                    }
+            }
+        });
+
+        $response = $app->server->serve();
+
+        return $response;
+    }
 
     /**
      * 获取支付信息配置
@@ -81,6 +106,6 @@ class Wechat
         $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
         return $app->oauth->scopes(['snsapi_userinfo'])
             ->setRequest($request)
-            ->redirect($request->input(url('thisurl')));
+            ->redirect(url($request->input('thisurl')));
     }
 }
