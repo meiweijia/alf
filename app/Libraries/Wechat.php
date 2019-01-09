@@ -12,25 +12,23 @@ namespace App\Libraries;
 use Illuminate\Http\Request;
 use EasyWeChat\Kernel\Messages\Text;
 use Illuminate\Support\Facades\Log;
+use Overtrue\LaravelWeChat\Facade as EasyWechat;
 
 class Wechat
 {
-    // 公众号
-    const WECHAT_TYPE_OFFICIAL_ACCOUNT = 'official_account';
-    // 微信支付
-    const WECHAT_TYPE_PAYMENT = 'payment';
-    // 小程序
-    const WECHAT_TYPE_MINI_PROGRAM = 'mini_program';
-    // 开放平台
-    const WECHAT_TYPE_OPEN = 'open_platform';
-    // 企业微信
-    const WECHAT_TYPE_WORK = 'work';
-    // 企业微信开放平台
-    const WECHAT_TYPE_OPEN_WORK = 'open_work';
-
+    /**
+     * 微信服务启动
+     *
+     * @param $name
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \EasyWeChat\Kernel\Exceptions\BadRequestException
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     * @throws \ReflectionException
+     */
     public function serve($name)
     {
-        $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
+        $app = EasyWechat::officialAccount();
         $app->server->push(function ($message) use ($name) {
             // $message['FromUserName'] // 用户的 openid
             // $message['MsgType'] // 消息类型：event, text....
@@ -52,14 +50,15 @@ class Wechat
     /**
      * 获取支付信息配置
      *
-     * @param string $trade_no
-     * @param int $total_fee
+     * @param $trade_no
+     * @param $total_fee
      * @param $body
-     * @return bool|array
+     * @return bool
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
      */
     public function getPaymentConfig($trade_no, $total_fee, $body)
     {
-        $app = app('wechat.' . self::WECHAT_TYPE_PAYMENT);
+        $app = EasyWechat::payment();
         $result = $app->order->unify([
             'body' => $body,
             'out_trade_no' => $trade_no,
@@ -89,7 +88,7 @@ class Wechat
      */
     public static function authUser()
     {
-        $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
+        $app = EasyWechat::officialAccount();
         return $app->oauth->user();
     }
 
@@ -101,7 +100,7 @@ class Wechat
      */
     public static function authLogin(Request $request)
     {
-        $app = app('wechat.' . self::WECHAT_TYPE_OFFICIAL_ACCOUNT);
+        $app = EasyWechat::officialAccount();
         return $app->oauth->scopes(['snsapi_userinfo'])
             ->setRequest($request)
             ->redirect(url($request->input('thisurl')));
