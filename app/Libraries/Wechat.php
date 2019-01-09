@@ -111,13 +111,16 @@ class Wechat
      * 微信登陆授权
      *
      * @param Request $request
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \Exception
      */
     public static function authLogin(Request $request)
     {
         $app = EasyWechat::officialAccount();
-        return $app->oauth->scopes(['snsapi_userinfo'])
-            ->setRequest($request)
-            ->redirect($request->input('thisurl'));
+        $num = generate_code();
+        $key = 'oauth_return_url_' . $num;
+        cache([$key => $request->input('thisurl')], 1);
+        return $app->oauth->setRequest($request)->redirect(route('v1.user.check_bind_mobile', $key));
     }
+
 }

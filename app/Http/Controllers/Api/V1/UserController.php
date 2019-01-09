@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Traits\PassportToken;
+use App\Models\UserWechatProfile as WechatUser;
 
 class UserController extends ApiController
 {
@@ -163,18 +164,33 @@ class UserController extends ApiController
      * 微信授权登录
      *
      * @param Request $request
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \App\Exceptions\InvalidRequestException
      */
     public function wechatAuth(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->checkPar($request, [
             'thisurl' => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return $this->error(['error' => $validator->errors()]);
-        }
-
         return Wechat::authLogin($request);
+    }
+
+    public function checkBindMobile($key)
+    {
+        //TODO 添加微信验证中间件
+        $user = Wechat::authUser();
+        $info = $user->getOriginal();
+        unset($info['privilege']);
+        $wechatUser = WechatUser::query()->with('user')->where('openid', $user->getId())->first();
+        if ($wechatUser) {
+            WechatUser::query()->where('openid')->update($info);
+            $bind = $wechatUser->user ? 1 : 0;
+        } else {
+            WechatUser::query()->create($info);
+            $bind = 0;
+        }
+        $url = cache($key);
+        return redirect($url . '?bind=' . $bind);
     }
 }

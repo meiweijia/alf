@@ -36,6 +36,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
         Route::any('login', 'UserController@login');
         Route::post('register', 'UserController@register');
         Route::get('wechat_auth', 'UserController@wechatAuth');
+        Route::get('check_bind_mobile/{key}', 'UserController@checkBindMobile')->name('v1.user.check_bind_mobile');
+
     });
 
     Route::group(['prefix' => 'user', 'middleware' => 'auth:api'], function () {
