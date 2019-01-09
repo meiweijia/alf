@@ -35,7 +35,7 @@ class Wechat
             // $message['FromUserName'] // 用户的 openid
             // $message['MsgType'] // 消息类型：event, text....
             switch ($message['MsgType']) {
-                case '':
+                case 'event':
                     switch ($message->Event) {
                         case 'subscribe':
                             return new Text('欢迎关注 ' . $name);
