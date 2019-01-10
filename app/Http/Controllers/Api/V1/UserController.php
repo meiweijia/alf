@@ -21,6 +21,7 @@ class UserController extends ApiController
 
     /**
      * 注册账号
+     *
      * @param Request $request
      * @return mixed
      * @throws \Exception
@@ -183,6 +184,7 @@ class UserController extends ApiController
     {
         //TODO 添加微信验证中间件
         $user = Wechat::authUser();
+        $token = $user->getAccessToken()->access_token;
         $info = $user->getOriginal();
         unset($info['privilege']);
         $wechatUser = WechatUser::query()->with('user')->where('openid', $user->getId())->first();
@@ -194,6 +196,6 @@ class UserController extends ApiController
             $bind = 0;
         }
         $url = cache($key);
-        return redirect($url . '?bind=' . $bind . '&code=' . $request->input('code') . '&state=' . $request->input('state'));
+        return redirect($url . '?bind=' . $bind . '&code=' . $request->input('code') . '&state=' . $request->input('state') . '&access_token=' . $token);
     }
 }
