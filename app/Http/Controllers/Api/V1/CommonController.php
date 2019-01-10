@@ -39,4 +39,21 @@ class CommonController extends ApiController
 
         return cache([SMS::MOBILE_CODE_KEY . '_' . $mobile_no => $code], Carbon::now()->addMinute(5)) ? $this->success($code) : $this->error(null);
     }
+
+    /**
+     *检测验证码
+     *
+     * @param Request $request
+     * @return mixed
+     * @throws \App\Exceptions\InvalidRequestException
+     */
+    public function checkCode(Request $request)
+    {
+        $this->checkPar($request, [
+            'mobile_no' => 'required',
+            'code' => 'required',
+        ]);
+
+        return Sms::checkCode($request->input('mobile_no'), $request->input('code')) ? $this->success(null) : $this->error(null);
+    }
 }
