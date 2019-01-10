@@ -54,9 +54,10 @@ class Wechat
      * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getWechatJssdkConfig()
+    public function getWechatJssdkConfig($url)
     {
         $app = EasyWechat::officialAccount();
+        $app->jssdk->setUrl($url);
         return $app->jssdk->buildConfig([
             "chooseWXPay" //微信支付
         ], true);

@@ -14,9 +14,13 @@ use Illuminate\Support\Facades\Redis;
 
 class PaymentController extends ApiController
 {
-    public function getWechatJssdkConfig()
+    public function getWechatJssdkConfig(Request $request)
     {
-        return app(Wechat::class)->getWechatJssdkConfig();
+        $this->checkPar($request, [
+            'thisurl' => 'required',
+        ]);
+
+        return app(Wechat::class)->getWechatJssdkConfig($request->input('thisurl'));
     }
 
     /**
