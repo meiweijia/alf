@@ -65,5 +65,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
 
     Route::any('payment/wechat_pay_notify', 'PaymentController@wechatPayNotify');//微信支付回调
 
+    Route::get('common/get_code', 'CommonController@getCode');//获取验证码
+
 });
 #endregion
