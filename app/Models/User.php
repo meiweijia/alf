@@ -32,7 +32,17 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'mobile_no', 'password',
+        'mobile_no',
+        'password',
+        'openid',
+        'nickname',
+        'sex',
+        'language',
+        'city',
+        'province',
+        'country',
+        'headimgurl',
+        'unionid',
     ];
 
     /**
@@ -41,18 +51,18 @@ class User extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password'
     ];
 
     /**
      * 重写登录字段
      *
-     * @param $login
+     * @param $username
      * @return mixed
      */
-    public function findForPassport($login)
+    public function findForPassport($username)
     {
-        return $this->where('mobile_no', $login)->first();
+        return $this->orWhere('openid', $username)->orWhere('mobile_no', $username)->first();
     }
 
     /**

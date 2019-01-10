@@ -37,10 +37,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
         Route::post('register', 'UserController@register');
         Route::get('wechat_auth', 'UserController@wechatAuth');
         Route::get('check_bind_mobile/{key}', 'UserController@checkBindMobile')->name('v1.user.check_bind_mobile');
-
+        Route::any('oauth_callback','UserController@oauthCallback')->name('v1.user.oauth_callback');
     });
 
-    Route::group(['prefix' => 'user', ], function () {
+    Route::group(['prefix' => 'user','middleware' => 'auth:api'], function () {
         Route::get('get_profile', 'UserController@getProfile');
         Route::get('get_balance_logs', 'OrderController@getBalanceLogs');
         Route::get('get_reserve_logs', 'OrderController@getReserveLogs');
@@ -50,16 +50,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
         Route::get('get_fields', 'FieldController@getFields');
     });
 
-    Route::group(['prefix' => 'order', ], function () {
+    Route::group(['prefix' => 'order', 'middleware' => 'auth:api'], function () {
         Route::post('reserve', 'OrderController@reserve');
         Route::post('recharge', 'OrderController@recharge');
         Route::get('get_order_detail', 'OrderController@getOrderDetail');
 
     });
 
-    Route::group(['prefix' => 'payment',], function () {
+    Route::group(['prefix' => 'payment', 'middleware' => 'auth:api'], function () {
         Route::post('payment_by_balance', 'PaymentController@paymentByBalance');
-        Route::get('payment_by_wechat', 'PaymentController@paymentByWechat');
+        Route::post('payment_by_wechat', 'PaymentController@paymentByWechat');
     });
     Route::get('payment/get_wechat_jssdk_config', 'PaymentController@getWechatJssdkConfig');
 

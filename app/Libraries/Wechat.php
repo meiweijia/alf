@@ -3,8 +3,11 @@
 namespace App\Libraries;
 
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use EasyWeChat\Kernel\Messages\Text;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 use Overtrue\LaravelWeChat\Facade as EasyWechat;
 
@@ -69,24 +72,24 @@ class Wechat
     public function getPaymentConfig($trade_no, $total_fee, $body)
     {
         $app = EasyWechat::payment();
-        $result = $app->order->unify([
+        $par = [
             'body' => $body,
             'out_trade_no' => $trade_no,
             'total_fee' => $total_fee,
             'trade_type' => 'JSAPI',
-            'openid' => self::authUser()->getId(),
-            'notify_url' => config('wechat.default.notify_url')
-        ]);
+            'openid' => User::query()->where('id', Auth::id())->pluck('openid')->first(),
+            'notify_url' => config('wechat.payment.default.notify_url')
+        ];
+
+        $result = $app->order->unify($par);
 
         Log::info('下单', $result);
 
         if ($result['return_code'] == 'SUCCESS' && $result['result_code'] == 'SUCCESS') {
-            $result = $this->app->jssdk->appConfig($result['prepay_id']);//第二次签名
-            Log::info('zhifu', $result);
-            $config = $this->app->jssdk->sdkConfig($result['prepayid']);
+            $result = $app->jssdk->appConfig($result['prepay_id']);//第二次签名
+            $config = $app->jssdk->sdkConfig($result['prepayid']);
             return $config;
         } else {
-            Log::error('微信支付签名失败:' . var_export($result, 1));
             return false;
         }
     }
@@ -94,12 +97,13 @@ class Wechat
     /**
      * 获取微信用户信息
      *
-     * @return \Overtrue\Socialite\User
+     * @param Request $request
+     * @return \Overtrue\Socialite\Providers\WeChatProvider|\Overtrue\Socialite\User
      */
-    public static function authUser()
+    public static function authUser(Request $request)
     {
         $app = EasyWechat::officialAccount();
-        return $app->oauth->user();
+        return $app->oauth->setRequest($request)->user();
     }
 
     /**
@@ -125,10 +129,7 @@ class Wechat
     public static function authLogin(Request $request)
     {
         $app = EasyWechat::officialAccount();
-        $num = generate_code();
-        $key = 'oauth_return_url_' . $num;
-        cache([$key => $request->input('thisurl')], 1);
-        return $app->oauth->setRequest($request)->redirect(route('v1.user.check_bind_mobile', $key));
+        return $app->oauth->setRequest($request)->redirect();
     }
 
 }
