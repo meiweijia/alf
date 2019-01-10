@@ -126,7 +126,7 @@ trait ApiResponse
      */
     public function error($data, $message = 'error')
     {
-        return $this->setStatusCode(FoundationResponse::HTTP_OK)->message($message, $data, false);
+        return $this->setStatusCode(FoundationResponse::HTTP_BAD_REQUEST)->message($message, $data, false);
     }
 
     /**
