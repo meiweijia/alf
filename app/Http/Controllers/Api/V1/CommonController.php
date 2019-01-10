@@ -25,21 +25,24 @@ class CommonController extends ApiController
             'mobile_no' => 'required'
         ]);
 
-        $code = generate_code(4);
 
         $mobile_no = $request->input('mobile_no');
 
-        //TODO 这里稍微再封装一个SMS类
-        $result = EasySms::send($mobile_no, [
-            'content' => '您的验证码为: ' . $code,
-            'template' => 'SMS_129070037',
-            'data' => [
-                'code' => $code
-            ],
-        ]);
-        cache([SMS::MOBILE_CODE_KEY . '_' . $mobile_no => $code], Carbon::now()->addMinute(5));
-        Log::info('sms_code_result',$result);
-        return isset($result['aliyun']['result']['Code']) ? $this->success($code) : $this->error(null);
+        if (!$code = cache(SMS::MOBILE_CODE_KEY . '_' . $mobile_no)) {
+            $code = generate_code(4);
+
+            //TODO 这里稍微再封装一个SMS类
+            $result = EasySms::send($mobile_no, [
+                'content' => '您的验证码为: ' . $code,
+                'template' => 'SMS_129070037',
+                'data' => [
+                    'code' => $code
+                ],
+            ]);
+            Log::info('sms_code_result', $result);
+            cache([SMS::MOBILE_CODE_KEY . '_' . $mobile_no => $code], Carbon::now()->addMinute(5));
+        }
+        return isset($result['aliyun']['result']['Code']) || $code ? $this->success($code) : $this->error(null);
     }
 
     /**
