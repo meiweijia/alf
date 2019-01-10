@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 
 use App\Http\Controllers\Api\ApiController;
+use App\Libraries\SMS;
 use App\Libraries\Wechat;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -20,9 +21,9 @@ class UserController extends ApiController
 
     /**
      * 注册账号
-     *
-     * @param $request
+     * @param Request $request
      * @return mixed
+     * @throws \Exception
      */
     public function register(Request $request)
     {
@@ -37,8 +38,8 @@ class UserController extends ApiController
             return $this->error($validator->errors());
         }
 
-        if (false) {
-            return '验证码错误';//todo test code
+        if (!SMS::checkCode($request->input('mobile_no'), $request->input('code'))) {
+            return $this->error(null, '验证码错误');
         }
 
         $input = $request->all();
@@ -56,6 +57,7 @@ class UserController extends ApiController
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse|mixed|string
+     * @throws \Exception
      */
     public function login(Request $request)
     {
@@ -69,14 +71,15 @@ class UserController extends ApiController
         }
 
         $input = $request->all();
+
         $user = User::query()->where('mobile_no', $input['mobile_no'])->first();
         if (!$user) {
             return '手机号未注册';//todo test code
         }
 
         if ($input['type'] == User::LOGIN_TYPE_CODE) {//短信登录
-            if (false) {
-                return '验证码错误';//todo test code
+            if (!SMS::checkCode($request->input('mobile_no'), $request->input('code'))) {
+                return $this->error(null, '验证码错误');
             }
             $password = $user->password;
         } else {
