@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Libraries\SMS;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CommonController extends ApiController
 {
@@ -36,8 +37,9 @@ class CommonController extends ApiController
                 'code' => $code
             ],
         ]);
-
-        return cache([SMS::MOBILE_CODE_KEY . '_' . $mobile_no => $code], Carbon::now()->addMinute(5)) ? $this->success($code) : $this->error(null);
+        cache([SMS::MOBILE_CODE_KEY . '_' . $mobile_no => $code], Carbon::now()->addMinute(5));
+        Log::info('sms_code_result',$result);
+        return isset($result['aliyun']['result']['Code']) ? $this->success($code) : $this->error(null);
     }
 
     /**
