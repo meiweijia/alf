@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: mei
- * Date: 2019/1/7
- * Time: 9:12
- */
 
 namespace App\Libraries;
 
@@ -106,6 +100,19 @@ class Wechat
     {
         $app = EasyWechat::officialAccount();
         return $app->oauth->user();
+    }
+
+    /**
+     * 根据openid获取用户
+     *
+     * @param $id
+     * @return array|\EasyWeChat\Kernel\Support\Collection|object|\Psr\Http\Message\ResponseInterface|string
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidConfigException
+     */
+    public static function getUserById($id)
+    {
+        $app = EasyWechat::officialAccount();
+        return $app->user->get($id);
     }
 
     /**
