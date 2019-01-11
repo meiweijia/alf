@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class PaymentController extends ApiController
@@ -96,28 +97,33 @@ class PaymentController extends ApiController
             if ($message['return_code'] === 'SUCCESS') { // return_code 表示通信状态，不代表支付状态
                 // 用户是否支付成功
                 if (array_get($message, 'result_code') === 'SUCCESS') {
-                    $order->paid_at = time(); // 更新支付时间为当前时间
-                    $order->status = Order::STATUS_APPLIED;
 
-                    //充值订单
-                    if ($order->type == Order::ORDER_TYPE_RECHARGE) {
-                        // 更新账户余额
-                        User::query()->where('user_id', $order->user_id)->increment('balance', $order->total_fee);
-                        //增加用户充值总额
-                        $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $order->total_fee);
-                        // 更新会员等级
-                        $level = User::calcLevel($total_recharge);
-                        User::query()->where('id', $order->user_id)->update(['level' => $level]);
+                    if ($order->status == Order::STATUS_PENDING) {//订单状态为未支付时，才进这里的逻辑 1
+                        //更新订单数据
+                        $order->paid_at = time(); // 更新支付时间为当前时间
+                        $order->status = Order::STATUS_APPLIED;
+                        $order->payment_no = $message['transaction_id'];
+                        $order->payment_method = Order::PAYMENT_TYPE_WECHAT;
 
-                    }
+                        //充值订单
+                        if ($order->type == Order::ORDER_TYPE_RECHARGE) {
+                            // 更新账户余额
+                            UserProfile::query()->where('user_id', $order->user_id)->increment('balance', $order->total_fees);
+                            //增加用户充值总额
+                            $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $order->total_fees);
+                            // 更新会员等级
+                            $level = User::calcLevel($total_recharge);//计算会员等级
+                            UserProfile::query()->where('id', $order->user_id)->update(['level' => $level]);
+                        }
 
-                    // 订场订单
-                    if ($order->type == Order::ORDER_TYPE_RESERVE && $order->payment_method == Order::PAYMENT_TYPE_CASH) {
-                        // 现金支付订单，也更新会员等级
-                        // 增加用户充值总额
-                        $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $order->total_fee);
-                        $level = User::calcLevel($total_recharge);
-                        User::query()->where('id', $order->user_id)->update(['level' => $level]);
+                        // 订场订单
+                        if ($order->type == Order::ORDER_TYPE_RESERVE && $order->payment_method == Order::PAYMENT_TYPE_WECHAT) {
+                            // 微信支付订单，也更新会员等级
+                            // 增加用户充值总额
+                            $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $order->total_fee);
+                            $level = User::calcLevel($total_recharge);//计算会员等级
+                            UserProfile::query()->where('id', $order->user_id)->update(['level' => $level]);
+                        }
                     }
 
                 } elseif (array_get($message, 'result_code') === 'FAIL') {// 用户支付失败

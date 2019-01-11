@@ -14,7 +14,8 @@ class Order extends Model
     const ORDER_TYPE_RESERVE = 1;//订单类型 订场
     const ORDER_TYPE_RECHARGE = 2;//订单类型 充值
 
-    const PAYMENT_TYPE_CASH = 'cash';//订单支付方式 现金 充值只能时这个
+    const PAYMENT_TYPE_CASH = 'cash';//订单支付方式 现金
+    const PAYMENT_TYPE_WECHAT = 'wechat';//订单支付方式 微信支付 充值只能是这个
 
     public static $orderStatusMap = [
         self::STATUS_PENDING => '待支付',
