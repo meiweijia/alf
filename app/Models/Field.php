@@ -17,7 +17,7 @@ class Field extends Model
     /**
      * 场地信息
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function profile()
     {
