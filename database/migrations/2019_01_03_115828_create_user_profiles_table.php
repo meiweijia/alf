@@ -18,7 +18,7 @@ class CreateUserProfilesTable extends Migration
             $table->unsignedInteger('user_id')->comment('用户ID');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->tinyInteger('level')->default(1)->comment('会员等级 1普通 2银 3金 4钻');
-            $table->decimal('balance')->defalut(0.00)->comment('余额');
+            $table->decimal('balance', 10, 0)->defalut(0)->comment('余额');
             $table->timestamps();
         });
     }

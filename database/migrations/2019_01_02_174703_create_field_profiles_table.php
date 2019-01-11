@@ -19,7 +19,7 @@ class CreateFieldProfilesTable extends Migration
             $table->foreign('field_id')->references('id')->on('fields')->onDelete('cascade');
             $table->tinyInteger('weekday')->default(0)->comment('周几');
             $table->tinyInteger('time')->default(1)->comment('时间');
-            $table->decimal('fees', 10, 2)->defalut(0.00)->comment('费用');
+            $table->decimal('fees', 10)->defalut(0)->comment('费用');
             $table->tinyInteger('amount')->default(1)->comment('数量');
             $table->timestamps();
         });
