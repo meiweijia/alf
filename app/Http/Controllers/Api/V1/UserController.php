@@ -28,16 +28,12 @@ class UserController extends ApiController
      */
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->checkPar($request, [
             'mobile_no' => 'required',
             'password' => 'required',
             'c_password' => 'required',
             'code' => 'required'
         ]);
-
-        if ($validator->fails()) {
-            return $this->error($validator->errors());
-        }
 
         if (!SMS::checkCode($request->input('mobile_no'), $request->input('code'))) {
             return $this->error(null, '验证码错误');
