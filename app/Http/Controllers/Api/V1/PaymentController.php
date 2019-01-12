@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 
+use App\Exceptions\InvalidRequestException;
 use App\Http\Controllers\Api\ApiController;
 use App\Libraries\Wechat;
 use App\Models\Order;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
@@ -35,22 +37,32 @@ class PaymentController extends ApiController
             'order_id' => 'required',
         ]);
 
-        $order = Order::query()->find($request->input('order_id'));
+        $data = DB::transaction(function () use ($request) {
+            $order = Order::query()->find($request->input('order_id'));
 
-        //判断订单状态
-        if ($order->status != Order::STATUS_PENDING) {
-            return $this->error('订单' . Order::$orderStatusMap[$order->status]);
-        }
+            //判断订单状态
+            if ($order->status != Order::STATUS_PENDING) {
+                throw new InvalidRequestException(null,'订单' . Order::$orderStatusMap[$order->status]);
+            }
 
-        $balance = UserProfile::query()->where('user_id')->pluck('balance');
-        if ($order->total_fees > $balance) {
-            return $this->error('余额不足');
-        }
+            $balance = UserProfile::query()->where('user_id', Auth::id())->pluck('balance')->first();
 
-        //更新订单状态
-        $order->update(['status' => Order::STATUS_APPLIED]);
-        //扣除账户余额
-        $data = UserProfile::query()->where('id', Auth::id())->decrement('balance', $order->total_fees);
+            if ($order->total_fees > $balance) {
+                return $this->error('余额不足');
+            }
+
+            //更新订单状态
+            $order->update([
+                'status' => Order::STATUS_APPLIED,
+                'paid_at' => time(),
+                'payment_method' => Order::PAYMENT_TYPE_BALANCE,
+            ]);
+
+            //扣除账户余额
+            return UserProfile::query()->where('user_id', Auth::id())->decrement('balance', $order->total_fees * 100);
+        });
+
+
         return $this->success($data, '支付成功');
     }
 
