@@ -108,9 +108,9 @@ class PaymentController extends ApiController
                         //充值订单
                         if ($order->type == Order::ORDER_TYPE_RECHARGE) {
                             // 更新账户余额
-                            UserProfile::query()->where('user_id', $order->user_id)->increment('balance', $order->total_fees);
+                            UserProfile::query()->where('user_id', $order->user_id)->increment('balance', $message['total_fee']);
                             //增加用户充值总额
-                            $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $order->total_fees);
+                            $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $message['total_fee']);
                             // 更新会员等级
                             $level = User::calcLevel($total_recharge);//计算会员等级
                             UserProfile::query()->where('id', $order->user_id)->update(['level' => $level]);
@@ -120,7 +120,7 @@ class PaymentController extends ApiController
                         if ($order->type == Order::ORDER_TYPE_RESERVE && $order->payment_method == Order::PAYMENT_TYPE_WECHAT) {
                             // 微信支付订单，也更新会员等级
                             // 增加用户充值总额
-                            $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $order->total_fee);
+                            $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $message['total_fee']);
                             $level = User::calcLevel($total_recharge);//计算会员等级
                             UserProfile::query()->where('id', $order->user_id)->update(['level' => $level]);
                         }
