@@ -25,6 +25,7 @@ class OrderService
         $order = DB::transaction(function () use ($fee, $type, $field_profile_id_arr) {
             $user = Auth::user();
             $order = new Order([
+                'total_fees' => $fee,
                 'status' => Order::STATUS_PENDING,
                 'type' => $type
             ]);
