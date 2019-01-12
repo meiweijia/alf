@@ -25,4 +25,10 @@ class FieldProfile extends Model
 
         return $this->newQuery()->where('id', $this->id)->where('stock', '>=', $amount)->decrement('stock', $amount);
     }
+
+
+    public function field()
+    {
+        return $this->belongsTo(Field::class);
+    }
 }

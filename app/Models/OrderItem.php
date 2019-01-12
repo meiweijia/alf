@@ -24,6 +24,7 @@ class OrderItem extends Model
         $this->attributes['fees'] = $value * 100;
     }
 
+
     public function field_profile()
     {
         return $this->belongsTo(FieldProfile::class);

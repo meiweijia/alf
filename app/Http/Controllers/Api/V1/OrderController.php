@@ -92,9 +92,20 @@ class OrderController extends ApiController
      */
     public function getReserveLogs(Request $request)
     {
-        $prePage = $request->input('per_page') ?? 10;
-        $data = $this->getOrder(Order::ORDER_TYPE_RESERVE, $prePage);
-        return $this->success($data);
+        $perPage = $request->input('per_page') ?? 10;
+
+
+        $data = Order::query()->where('user_id', Auth::id())
+            ->with([
+                'item:order_id,field_profile_id',
+                'item.field_profile:id,field_id',
+                'item.field_profile.field:id,name,type'
+            ])
+            ->select('id', 'status', 'total_fees', 'created_at')
+            ->where('type', Order::ORDER_TYPE_RESERVE)
+            ->paginate($perPage);
+
+        return $this->success($this->paginate($data));
     }
 
     /**
