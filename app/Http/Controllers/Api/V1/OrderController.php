@@ -130,6 +130,13 @@ class OrderController extends ApiController
         return $this->paginate($data);
     }
 
+    /**
+     * 订单详情
+     *
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|null
+     * @throws \App\Exceptions\InvalidRequestException
+     */
     public function getOrderDetail(Request $request)
     {
         $this->checkPar($request, [
@@ -137,7 +144,8 @@ class OrderController extends ApiController
         ]);
         return Order::query()->with([
             'items',
-            'items.field_profile'
+            'items.field_profile',
+            'items.field_profile.field:id,name,type'
         ])->find($request->input('order_id'));
     }
 }
