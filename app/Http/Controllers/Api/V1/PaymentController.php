@@ -42,7 +42,7 @@ class PaymentController extends ApiController
 
             //判断订单状态
             if ($order->status != Order::STATUS_PENDING) {
-                throw new InvalidRequestException(null,'订单' . Order::$orderStatusMap[$order->status]);
+                throw new InvalidRequestException(null, '订单' . Order::$orderStatusMap[$order->status]);
             }
 
             $balance = UserProfile::query()->where('user_id', Auth::id())->pluck('balance')->first();
@@ -57,6 +57,10 @@ class PaymentController extends ApiController
                 'paid_at' => time(),
                 'payment_method' => Order::PAYMENT_TYPE_BALANCE,
             ]);
+
+            $order->items->each(function ($item) {
+                $item->field_profile->update(['amount' => 0]);
+            });
 
             //扣除账户余额
             return UserProfile::query()->where('user_id', Auth::id())->decrement('balance', $order->total_fees * 100);
@@ -135,6 +139,10 @@ class PaymentController extends ApiController
                             $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $message['total_fee']);
                             $level = User::calcLevel($total_recharge);//计算会员等级
                             UserProfile::query()->where('id', $order->user_id)->update(['level' => $level]);
+                            //更新场地为不可选
+                            $order->items->each(function ($item) {
+                                $item->field_profile->update(['amount' => 0]);
+                            });
                         }
                     }
 

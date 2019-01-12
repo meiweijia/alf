@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class FieldProfile extends Model
 {
+    protected $fillable = [
+        'amount'
+    ];
+
     public function getFeesAttribute($value)
     {
         return $value / 100;
