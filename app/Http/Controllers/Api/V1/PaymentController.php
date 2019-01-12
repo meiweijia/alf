@@ -67,7 +67,7 @@ class PaymentController extends ApiController
 
         $order = Order::query()->find($request->input('order_id'));
         //生成微信支付配置项
-        $config = app(Wechat::class)->getPaymentConfig($order->no, $order->total_fees, '澳莱芙支付中心-预定场馆');
+        $config = app(Wechat::class)->getPaymentConfig($order->no, $order->total_fees * 100, '澳莱芙支付中心-预定场馆');
 
         return $config ? $this->success($config) : $this->error(null, '微信支付签名验证失败');
     }
