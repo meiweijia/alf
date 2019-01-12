@@ -7,6 +7,7 @@ use App\Exceptions\InvalidRequestException;
 use App\Models\FieldProfile;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -63,8 +64,8 @@ class OrderService
      */
     public function getOverdueFieldProfile()
     {
-        $time_start = date('Y-m-d H:i:s', strtotime('-5 minute'));//minute
-        $time_end = date('Y-m-d H:i:s', strtotime('+5 minute'));
+        $time_start = date('Y-m-d H:i:s', strtotime('-1 minute'));//minute
+        $time_end = date('Y-m-d H:i:s', strtotime('+1 minute'));
 
         return OrderItem::query()->whereBetween('expires_at', [$time_start, $time_end])->where('status', 1)->get();
     }
@@ -78,7 +79,7 @@ class OrderService
     {
         DB::transaction(function () {
             $orderItems = self::getOverdueFieldProfile();
-            Log::info('handleOverdueFieldProfile',$orderItems->toArray());
+            Log::info('handleOverdueFieldProfile', $orderItems->toArray());
             foreach ($orderItems as $orderItem) {
                 $orderItem->status = 0;//设置为已过期
                 $orderItem->save();
@@ -102,15 +103,40 @@ class OrderService
             ->get();
     }
 
+    /**
+     * 处理已经支付的订单，如果订单下所有的预定场地都已经过期，则把订单设为已完成状态
+     */
     public function handleAppliedOrder()
     {
         $orders = self::getAppliedOrder();
-        Log::info('handleAppliedOrder',$orders->toArray());
+        Log::info('handleAppliedOrder', $orders->toArray());
         foreach ($orders as $order) {
             if ($order->items->isEmpty()) {
                 $order->status = Order::STATUS_SUCCESS;
                 $order->save();
             }
+        }
+    }
+
+
+    public function getFailedOrder()
+    {
+        $time_start = date('Y-m-d H:i:s', strtotime('-5 minute'));//5分钟未支付，订单失效
+        return Order::query()
+            ->where('created_at', '<=', $time_start)
+            ->where('status', Order::STATUS_PENDING)
+            ->get();
+    }
+
+    public function handleFailedOrder()
+    {
+        $orders = self::getFailedOrder();
+        foreach ($orders as $order) {
+            $order->update(['status' => Order::STATUS_FAILED]);
+            $order->items->each(function ($item) {
+                $item->update(['status' => 0]);
+                FieldProfile::query()->where('id', $item->field_profile_id)->update(['amount' => 1]);//场地数量设置为1，就是可以预定啦。
+            });
         }
     }
 }

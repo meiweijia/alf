@@ -5,14 +5,14 @@ namespace App\Console\Commands;
 use App\Services\OrderService;
 use Illuminate\Console\Command;
 
-class SPField extends Command
+class OverdueOrder extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'SPField';
+    protected $signature = 'overdueOrder';
 
     /**
      * The console command description.
@@ -34,10 +34,10 @@ class SPField extends Command
     /**
      * Execute the console command.
      *
+     * @return mixed
      */
     public function handle()
     {
         app(OrderService::class)->handleOverdueFieldProfile();
-        app(OrderService::class)->handleAppliedOrder();
     }
 }

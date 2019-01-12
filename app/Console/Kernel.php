@@ -2,7 +2,9 @@
 
 namespace App\Console;
 
-use App\Console\Commands\SPField;
+use App\Console\Commands\AppliedOrder;
+use App\Console\Commands\FailedOrder;
+use App\Console\Commands\OverdueOrder;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -14,7 +16,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        SPField::class,
+        FailedOrder::class,
+        AppliedOrder::class,
+        OverdueOrder::class,
     ];
 
     /**
@@ -27,7 +31,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $schedule->command('SPField')->hourly();
+        $schedule->command('failedOrder')->everyMinute();//处理已经完成的场地信息
+        $schedule->command('appliedOrder')->everyFiveMinutes();//处理未支付的订单
+        $schedule->command('overdueOrder')->everyTenMinutes();//处理已经完成的场地信息
     }
 
     /**
