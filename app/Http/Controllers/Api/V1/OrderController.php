@@ -97,9 +97,9 @@ class OrderController extends ApiController
 
         $data = Order::query()->where('user_id', Auth::id())
             ->with([
-                'item:order_id,field_profile_id',
-                'item.field_profile:id,field_id',
-                'item.field_profile.field:id,name,type'
+                'items:order_id,field_profile_id',
+                'items.field_profile:id,field_id',
+                'items.field_profile.field:id,name,type'
             ])
             ->select('id', 'status', 'total_fees', 'created_at')
             ->where('type', Order::ORDER_TYPE_RESERVE)
