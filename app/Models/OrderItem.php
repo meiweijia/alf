@@ -21,7 +21,7 @@ class OrderItem extends Model
 
     public function setFeesAttribute($value)
     {
-        return $value * 100;
+        $this->attributes['fees'] = $value * 100;
     }
 
     public function field_profile()

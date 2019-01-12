@@ -18,6 +18,6 @@ class UserProfile extends Model
 
     public function setBalanceAttribute($value)
     {
-        return $value * 100;
+        $this->attributes['balance'] = $value * 100;
     }
 }

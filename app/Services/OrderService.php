@@ -29,11 +29,12 @@ class OrderService
                 'status' => Order::STATUS_PENDING,
                 'type' => $type
             ]);
+            dd($order);
             // 订单关联到当前用户
             $order->user()->associate($user);
             // 写入数据库
             $order->save();
-
+            dd($order);
             $total_fees = 0;
 
             foreach ($field_profile_id_arr as $v) {

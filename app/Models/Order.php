@@ -64,7 +64,7 @@ class Order extends Model
 
     public function setTotalFeesAttribute($value)
     {
-        return $value * 100;
+        $this->attributes['total_fees'] = $value * 100;
     }
 
     public static function findAvailableNo()
