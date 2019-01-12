@@ -16,6 +16,7 @@ class Order extends Model
 
     const PAYMENT_TYPE_CASH = 'cash';//订单支付方式 现金
     const PAYMENT_TYPE_WECHAT = 'wechat';//订单支付方式 微信支付 充值只能是这个
+    const PAYMENT_TYPE_BALANCE = 'balance';//账户余额支付，只能订场
 
     public static $orderStatusMap = [
         self::STATUS_PENDING => '待支付',

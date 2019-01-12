@@ -40,7 +40,7 @@ class OrderService
                 $total_fees += $v['fees'];
                 //检查场馆
                 if ((FieldProfile::query()->where('id', $v['id'])->pluck('amount')->first()) < 1) {
-                    throw new InvalidRequestException('场馆已经被选择');
+                    throw new InvalidRequestException(null,'场馆已经被选择');
                 }
 
                 $day = week_day_map()[$v['weekday']];

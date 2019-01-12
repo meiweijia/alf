@@ -105,8 +105,7 @@ class OrderController extends ApiController
             ->where('type', Order::ORDER_TYPE_RESERVE)
             ->whereIn('status', [
                 Order::STATUS_SUCCESS,
-                Order::STATUS_APPLIED,
-                Order::STATUS_PENDING])
+                Order::STATUS_APPLIED])
             ->orderByDesc('created_at')
             ->paginate($perPage);
 
