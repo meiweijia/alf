@@ -57,6 +57,16 @@ class Order extends Model
         });
     }
 
+    public function getTotalFeesAttribute($value)
+    {
+        return $value / 100;
+    }
+
+    public function setTotalFeesAttribute($value)
+    {
+        return $value * 100;
+    }
+
     public static function findAvailableNo()
     {
         // 订单流水号前缀

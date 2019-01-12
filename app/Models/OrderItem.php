@@ -14,6 +14,16 @@ class OrderItem extends Model
         'expires_at',
     ];
 
+    public function getFeesAttribute($value)
+    {
+        return $value / 100;
+    }
+
+    public function setFeesAttribute($value)
+    {
+        return $value * 100;
+    }
+
     public function field_profile()
     {
         return $this->belongsTo(FieldProfile::class);

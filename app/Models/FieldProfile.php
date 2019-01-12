@@ -7,6 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class FieldProfile extends Model
 {
+    public function getFeesAttribute($value)
+    {
+        return $value / 100;
+    }
+
+    public function setFeesAttribute($value)
+    {
+        return $value * 100;
+    }
+
     public function decreaseStock($amount)
     {
         if ($amount < 0) {

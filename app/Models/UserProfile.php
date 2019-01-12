@@ -10,4 +10,14 @@ class UserProfile extends Model
         'level',
         'balance'
     ];
+
+    public function getBalanceAttribute($value)
+    {
+        return $value / 100;
+    }
+
+    public function setBalanceAttribute($value)
+    {
+        return $value * 100;
+    }
 }

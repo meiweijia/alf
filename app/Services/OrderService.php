@@ -25,7 +25,6 @@ class OrderService
         $order = DB::transaction(function () use ($fee, $type, $field_profile_id_arr) {
             $user = Auth::user();
             $order = new Order([
-                'total_fees' => $fee,
                 'status' => Order::STATUS_PENDING,
                 'type' => $type
             ]);
@@ -34,9 +33,13 @@ class OrderService
             // 写入数据库
             $order->save();
 
+            $total_fees = 0;
+
             foreach ($field_profile_id_arr as $v) {
+                $total_fees += $v['fees'];
+                //TODO 这里还有问题
                 //检查场馆
-                if (($a = FieldProfile::query()->where('id', $v['id'])->decrement('amount')) < 1) {
+                if ((FieldProfile::query()->where('id', $v['id'])->decrement('amount')) < 1) {
                     throw new InvalidRequestException('场馆已经被选择');
                 }
 
@@ -52,6 +55,10 @@ class OrderService
                 ]);
                 $item->save();
             }
+
+            $order->update([
+                'total_fees' => $total_fees
+            ]);
             return $order;
         });
         return $order;
