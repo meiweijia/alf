@@ -33,14 +33,13 @@ class OrderService
             $order->user()->associate($user);
             // 写入数据库
             $order->save();
-            
+
             $total_fees = 0;
 
             foreach ($field_profile_id_arr as $v) {
                 $total_fees += $v['fees'];
-                //TODO 这里还有问题
                 //检查场馆
-                if ((FieldProfile::query()->where('id', $v['id'])->decrement('amount')) < 1) {
+                if ((FieldProfile::query()->where('id', $v['id'])->pluck('amount')->first()) < 1) {
                     throw new InvalidRequestException('场馆已经被选择');
                 }
 
@@ -56,10 +55,12 @@ class OrderService
                 ]);
                 $item->save();
             }
+            if ($type == Order::ORDER_TYPE_RESERVE) {
+                $order->update([
+                    'total_fees' => $total_fees
+                ]);
+            }
 
-            $order->update([
-                'total_fees' => $total_fees
-            ]);
             return $order;
         });
         return $order;

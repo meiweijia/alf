@@ -103,6 +103,11 @@ class OrderController extends ApiController
             ])
             ->select('id', 'status', 'total_fees', 'created_at')
             ->where('type', Order::ORDER_TYPE_RESERVE)
+            ->whereIn('status', [
+                Order::STATUS_SUCCESS,
+                Order::STATUS_APPLIED,
+                Order::STATUS_PENDING])
+            ->orderByDesc('created_at')
             ->paginate($perPage);
 
         return $this->success($this->paginate($data));
@@ -120,6 +125,8 @@ class OrderController extends ApiController
         $user_id = Auth::id();
         $data = Order::query()->where('user_id', $user_id)
             ->where('type', $type)
+            ->where('status', Order::STATUS_APPLIED)
+            ->orderByDesc('created_at')
             ->paginate($perPage);
         return $this->paginate($data);
     }
@@ -129,6 +136,9 @@ class OrderController extends ApiController
         $this->checkPar($request, [
             'order_id' => 'required',
         ]);
-        return Order::query()->with(['items', 'items.field_profile'])->find($request->input('order_id'));
+        return Order::query()->with([
+            'items',
+            'items.field_profile'
+        ])->find($request->input('order_id'));
     }
 }
