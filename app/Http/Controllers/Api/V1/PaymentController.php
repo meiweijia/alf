@@ -124,7 +124,22 @@ class PaymentController extends ApiController
                         //充值订单
                         if ($order->type == Order::ORDER_TYPE_RECHARGE) {
                             // 更新账户余额
-                            UserProfile::query()->where('user_id', $order->user_id)->increment('balance', $message['total_fee']);
+                            $total_fee = 0;
+                            switch ($message['total_fee']) {
+                                case 20000:
+                                    $total_fee = 21000;
+                                    break;
+                                case 30000:
+                                    $total_fee = 32000;
+                                    break;
+                                case 50000:
+                                    $total_fee = 55000;
+                                    break;
+                                case 100000:
+                                    $total_fee = 115000;
+                                    break;
+                            }
+                            UserProfile::query()->where('user_id', $order->user_id)->increment('balance', $total_fee);
                             //增加用户充值总额
                             $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $message['total_fee']);
                             // 更新会员等级
