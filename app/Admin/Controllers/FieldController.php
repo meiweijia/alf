@@ -24,8 +24,8 @@ class FieldController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('列表')
-            ->description('场馆设置')
+            ->header('场馆设置')
+            ->description('列表')
             ->body($this->grid());
     }
 

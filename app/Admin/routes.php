@@ -14,4 +14,6 @@ Route::group([
     $router->resource('setting/users', 'UserController');
     $router->resource('setting/fields', 'FieldController');
     $router->resource('setting/field_profiles', 'FieldProfileController');
+    $router->get('setting/badminton', 'ReserveController@badminton');
+    $router->get('setting/basketball', 'ReserveController@basketball');
 });
