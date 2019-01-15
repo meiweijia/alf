@@ -10,19 +10,27 @@ class Order extends Model
     const STATUS_APPLIED = '2';
     const STATUS_SUCCESS = '3';
     const STATUS_FAILED = '0';
+    public static $orderStatusMap = [
+        self::STATUS_PENDING => '待支付',
+        self::STATUS_APPLIED => '待消费',
+        self::STATUS_SUCCESS => '已完成',
+        self::STATUS_FAILED => '已过期'
+    ];
 
     const ORDER_TYPE_RESERVE = 1;//订单类型 订场
     const ORDER_TYPE_RECHARGE = 2;//订单类型 充值
+    public static $typeMap = [
+        self::ORDER_TYPE_RESERVE => '订场',
+        self::ORDER_TYPE_RECHARGE => '充值',
+    ];
 
     const PAYMENT_TYPE_CASH = 'cash';//订单支付方式 现金
     const PAYMENT_TYPE_WECHAT = 'wechat';//订单支付方式 微信支付 充值只能是这个
     const PAYMENT_TYPE_BALANCE = 'balance';//账户余额支付，只能订场
-
-    public static $orderStatusMap = [
-        self::STATUS_PENDING => '待支付',
-        self::STATUS_APPLIED => '已支付',
-        self::STATUS_SUCCESS => '已完成',
-        self::STATUS_FAILED => '已过期'
+    public static $paymentMap = [
+        self::PAYMENT_TYPE_CASH => '线下支付',
+        self::PAYMENT_TYPE_WECHAT => '微信支付',
+        self::PAYMENT_TYPE_BALANCE => '余额支付',
     ];
 
     protected $fillable = [
