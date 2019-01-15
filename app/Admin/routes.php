@@ -11,5 +11,7 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index');
-
+    $router->resource('setting/users', 'UserController');
+    $router->resource('setting/fields', 'FieldController');
+    $router->resource('setting/field_profiles', 'FieldProfileController');
 });

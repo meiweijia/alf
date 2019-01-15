@@ -23,4 +23,11 @@ class Field extends Model
     {
         return $this->hasMany(FieldProfile::class);
     }
+
+    public function sunday()
+    {
+        $this->with('profile', function ($query) {
+            $query->where('weekday', 0);
+        })->get();
+    }
 }
