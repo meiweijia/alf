@@ -69,6 +69,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\V1'], function () {
     Route::get('common/get_code', 'CommonController@getCode');//获取验证码
     Route::get('common/check_code', 'CommonController@checkCode');//检测验证码
 
+    //电脑端选场地接口
+    Route::post('order/reserve_with_admin', 'OrderController@reserveWithAdmin');
 
 });
 #endregion

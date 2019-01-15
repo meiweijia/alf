@@ -71,6 +71,26 @@ class OrderController extends ApiController
         return $config ? $this->success($config) : $this->error(null, '微信支付签名验证失败');
     }
 
+
+    public function reserveWithAdmin(Request $request, OrderService $orderService)
+    {
+        $this->checkPar($request, [
+            'fees' => 'required',
+            'fields' => 'required',
+        ]);
+
+        $fees = $request->input('fees');
+
+        $fields = $request->input('fields');
+
+        $field_arr = json_decode($fields, true);
+
+        //创建订单
+        $order = $orderService->store($fees, Order::ORDER_TYPE_RESERVE, $field_arr);
+
+        return $this->success($order,'预定成功！');
+    }
+
     /**
      * 获取充值记录
      *

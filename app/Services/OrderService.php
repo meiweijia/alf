@@ -7,6 +7,7 @@ use App\Exceptions\InvalidRequestException;
 use App\Models\FieldProfile;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,9 @@ class OrderService
     {
         $order = DB::transaction(function () use ($fee, $type, $field_profile_id_arr) {
             $user = Auth::user();
+            if (!$user) {
+                $user = User::find(0);
+            }
             $order = new Order([
                 'total_fees' => $fee,
                 'status' => Order::STATUS_PENDING,
@@ -40,7 +44,11 @@ class OrderService
                 $total_fees += $v['fees'];
                 //检查场馆
                 if ((FieldProfile::query()->where('id', $v['id'])->pluck('amount')->first()) < 1) {
-                    throw new InvalidRequestException(null,'场馆已经被选择');
+                    throw new InvalidRequestException(null, '场馆已经被选择');
+                }
+
+                if ($user->id == 0) {//线下下单，直接把场馆设为不可预定
+                    FieldProfile::query()->where('id', $v['id'])->update(['amount' => 0]);
                 }
 
                 $day = week_day_map()[$v['weekday']];
