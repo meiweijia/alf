@@ -10,7 +10,7 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
 ], function (Router $router) {
 
-    $router->get('/', 'HomeController@index');
+    $router->get('/', 'ReserveController@badminton');
     $router->resource('setting/users', 'UserController');
     $router->resource('setting/fields', 'FieldController');
     $router->resource('setting/field_profiles', 'FieldProfileController');
