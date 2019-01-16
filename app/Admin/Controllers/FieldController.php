@@ -89,8 +89,6 @@ class FieldController extends Controller
             return $value == 1 ? '羽毛球' : '篮球';
         });
         $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
-
 
         $grid->filter(function ($filter) {
             $filter->expand();

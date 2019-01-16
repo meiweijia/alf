@@ -91,7 +91,6 @@ class UserController extends Controller
         $grid->province('省份');
         $grid->country('国家');
         $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
 
         $grid->disableCreateButton();
         $grid->disableActions();

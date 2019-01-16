@@ -4,12 +4,14 @@ namespace App\Admin\Controllers;
 
 use App\Models\Order;
 use App\Http\Controllers\Controller;
+use App\Models\OrderItem;
 use App\Models\User;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Illuminate\Database\Eloquent\Model;
 
 class OrderController extends Controller
 {
@@ -93,7 +95,6 @@ class OrderController extends Controller
             return User::query()->where('id', $value)->pluck('nickname')->first();
         });
         $grid->total_fees('费用');
-        $grid->remark('备注');
         $grid->paid_at('支付时间');
         $grid->payment_method('支付方式')->display(function ($value) {
             return $value ? Order::$paymentMap[$value] : null;
@@ -105,8 +106,35 @@ class OrderController extends Controller
         $grid->type('类型')->display(function ($value) {
             return Order::$typeMap[$value];
         });
+
+        $grid->column('场地')->display(function () {
+
+            $data = OrderItem::query()
+                ->selectRaw('fields.type as 类型,fields.name as 场地, order_items.expires_at as 过期时间')
+                ->join('field_profiles', 'order_items.field_profile_id', '=', 'field_profiles.id')
+                ->join('fields', 'fields.id', '=', 'field_profiles.field_id')
+                ->where('order_id', $this->id)
+                ->get()->toArray();
+            foreach ($data as $k => $v) {
+                $data[$k]['类型'] = $v['类型'] == 1 ? '羽毛球' : '篮球';
+                unset($data[$k]['start_time']);
+            }
+            return $data;
+        })->table();
+
         $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
+
+        $grid->filter(function ($filter) {
+            $filter->expand();
+            // 去掉默认的id过滤器
+            $filter->disableIdFilter();
+
+            // 在这里添加字段过滤器
+            $filter->column(6, function ($filter) {
+                $filter->equal('type', '订单类型')->select(Order::$typeMap);
+            });
+
+        });
 
         $grid->disableCreateButton();
         $grid->disableActions();
