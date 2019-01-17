@@ -81,10 +81,12 @@ class OrderService
      */
     public function getOverdueFieldProfile()
     {
-        $time_start = date('Y-m-d H:i:s', strtotime('-1 minute'));//minute
-        $time_end = date('Y-m-d H:i:s', strtotime('+1 minute'));
+        $time_end = date('Y-m-d H:i:s', strtotime('+5 minute'));
 
-        return OrderItem::query()->whereBetween('expires_at', [$time_start, $time_end])->where('status', 1)->get();
+        return OrderItem::query()
+            ->where('expires_at', '<', $time_end)
+            ->where('status', 1)
+            ->get();
     }
 
     /**
@@ -101,6 +103,15 @@ class OrderService
                 $orderItem->status = 0;//设置为已过期
                 $orderItem->save();
                 FieldProfile::query()->where('id', $orderItem->field_profile_id)->update(['amount' => 1]);//场地数量设置为1，就是可以预定啦。
+            }
+
+            $orders = self::getAppliedOrder();
+            Log::info('handleAppliedOrder', $orders->toArray());
+            foreach ($orders as $order) {
+                if ($order->items->isEmpty()) {
+                    $order->status = Order::STATUS_SUCCESS;
+                    $order->save();
+                }
             }
         });
         return true;
@@ -119,22 +130,6 @@ class OrderService
             ->where('status', Order::STATUS_APPLIED)
             ->get();
     }
-
-    /**
-     * 处理已经支付的订单，如果订单下所有的预定场地都已经过期，则把订单设为已完成状态
-     */
-    public function handleAppliedOrder()
-    {
-        $orders = self::getAppliedOrder();
-        Log::info('handleAppliedOrder', $orders->toArray());
-        foreach ($orders as $order) {
-            if ($order->items->isEmpty()) {
-                $order->status = Order::STATUS_SUCCESS;
-                $order->save();
-            }
-        }
-    }
-
 
     public function getFailedOrder()
     {

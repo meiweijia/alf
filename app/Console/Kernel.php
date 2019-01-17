@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         // $schedule->command('failedOrder')->everyMinute()->withoutOverlapping();;//处理已经完成的场地信息
-        $schedule->command('appliedOrder')->everyFiveMinutes()->withoutOverlapping();;//处理未支付的订单
-        $schedule->command('overdueOrder')->everyTenMinutes()->withoutOverlapping();;//处理已经完成的场地信息
+//        $schedule->command('appliedOrder')->everyFiveMinutes();//处理未支付的订单
+        $schedule->command('overdueOrder')->everyMinute();//处理已经完成的场地信息
     }
 
     /**
