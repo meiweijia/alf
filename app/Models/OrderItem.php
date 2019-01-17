@@ -13,6 +13,7 @@ class OrderItem extends Model
         'amount',
         'fees',
         'expires_at',
+        'status'
     ];
 
     protected $appends = ['start_time'];
