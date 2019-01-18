@@ -12,9 +12,12 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class OrderService
 {
+    const RESERVE_FIELD_INFO_MSG_KEY = 'alf:reserve:field:info:msg:';
+
     /**
      * @param $fee
      * @param $type
@@ -40,7 +43,10 @@ class OrderService
 
             $total_fees = 0;
 
-            foreach ($field_profile_id_arr as $v) {
+            $sms_msg = '';
+            $day = '';
+            $count = count($field_profile_id_arr);
+            foreach ($field_profile_id_arr as $k => $v) {
                 $total_fees += $v['fees'];
                 //检查场馆
                 if ((FieldProfile::query()->where('id', $v['id'])->pluck('amount')->first()) < 1) {
@@ -52,17 +58,29 @@ class OrderService
                 }
 
                 $day = week_day_map()[$v['weekday']];
-                $hour = sprintf("%02d", $v['time'] + 1);//1小时过期
+                $time_end = sprintf("%02d", $v['time'] + 1) . ':00:00';//1小时过期
 
                 $item = $order->items()->make([
                     'field_profile_id' => $v['id'],
                     'amount' => 1,
                     'fees' => $v['fees'],
                     'status' => 1,
-                    'expires_at' => $day . ' ' . $hour . ':00:00'
+                    'expires_at' => $day . ' ' . $time_end
                 ]);
                 $item->save();
+
+                $time_start = sprintf("%02d", $v['time']) . ':00:00';
+
+                $sms_msg .= $time_start . '-' . $time_end . '（' . $v['name'] . '）' . ($k == $count - 1 ? '；' : '、');//10:00-11:00（场地1）、10:00-12:00（场地2）；
             }
+
+            Redis::hmset(self::RESERVE_FIELD_INFO_MSG_KEY . $order->id, [
+                'day' => $day,
+                'msg' => $sms_msg,
+                'type' => $type
+            ]);
+
+
             if ($type == Order::ORDER_TYPE_RESERVE) {
                 $order->update([
                     'total_fees' => $total_fees

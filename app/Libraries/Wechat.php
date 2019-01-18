@@ -132,4 +132,27 @@ class Wechat
         return $app->oauth->setRequest($request)->redirect();
     }
 
+    /**
+     * 发送模板消息
+     * @param string $open_id
+     * @param string $temp_id
+     * @param string $url
+     * @param array $data
+     * @throws \EasyWeChat\Kernel\Exceptions\InvalidArgumentException
+     * @return array
+     */
+    public function sendTempMsg(string $open_id, string $temp_id, array $data, string $url = null)
+    {
+        $app = EasyWechat::officialAccount();
+        $send = [
+            'touser' => $open_id,
+            'template_id' => $temp_id,
+            'data' => $data
+        ];
+        if ($url) {
+            $send['url'] = $url;
+        }
+        return $app->template_message->send($send);
+    }
+
 }

@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Api\V1;
 
 
 use App\Exceptions\InvalidRequestException;
+use App\Facades\EasySms;
 use App\Http\Controllers\Api\ApiController;
 use App\Libraries\Wechat;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use Overtrue\EasySms\Exceptions\NoGatewayAvailableException;
 
 class PaymentController extends ApiController
 {
@@ -66,6 +69,45 @@ class PaymentController extends ApiController
             return UserProfile::query()->where('user_id', Auth::id())->decrement('balance', $order->total_fees * 100);
         });
 
+        $order = Order::query()->find($request->input('order_id'));
+        //订场成功后，发送短信或者微信模板消息
+        $day = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'day');
+        $msg = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'msg');
+        $type = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'type');
+        //用完了就删掉，删除redis中的信息
+        Redis::del([OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id]);
+        $field_info = '日期为' . $day . '，时段' . $msg;
+
+        $user = User::query()->where('id', $order->user_id)->first();
+        $temp_id = 's3hPD_voLenSUxpnsgh8o68TiAcLbFZEdaRlSQMrKjI';
+        $data = [
+            'first' => '尊敬的' . $user->nickname . '，您的订场已成功。',
+            'keyword1' => '深圳澳莱芙球馆',//场馆名称
+            'keyword2' => '室内' . $type == 1 ? '羽毛球' : '篮球',//消费项目
+            'keyword3' => $field_info,//场地信息
+            'keyword4' => $order->total_fees,//付款金额
+            'remark' => '澳莱芙球馆感谢您的惠顾！',
+        ];
+        app(Wechat::class)->sendTempMsg($user->openid, $temp_id, $data);
+
+
+        //如果绑定了手机号，发个短信通知下
+        try{
+            if ($user && $user->mobile_no) {
+                $result = EasySms::send($user->mobile_no, [
+                    'template' => 'SMS_156280001',
+                    'data' => [
+                        'name' => $user->nickname,
+                        'activity' => '室内' . $type == 1 ? '羽毛球' : '篮球',
+                        'date' => $day,
+                        'time' => $msg
+                    ],
+                ]);
+                Log::info('sms_code_result', $result);
+            }
+        }catch (NoGatewayAvailableException $exception){
+            Log::info('sms_send_err',$exception->getExceptions());
+        }
 
         return $this->success($data, '支付成功');
     }
@@ -144,7 +186,33 @@ class PaymentController extends ApiController
                             $total_recharge = Redis::incrby(User::TOTAL_RECHARGE_KEY . $order->user_id, $message['total_fee']);
                             // 更新会员等级
                             $level = User::calcLevel($total_recharge);//计算会员等级
-                            UserProfile::query()->where('id', $order->user_id)->update(['level' => $level]);
+                            UserProfile::query()->where('user_id', $order->user_id)->update(['level' => $level]);
+                            //充值后，余额是多少，发送短信或者微信模板消息
+                            $balance = UserProfile::query()->where('user_id', 2)->pluck('balance')->first();
+                            $temp_id = '4qwW1_8doikHcI_pbiAk3lc69e80uSrScb_JhzjP_Bg';
+                            $data = [
+                                'first' => '您好，您的余额充值已成功！',
+                                'keyword1' => $message['total_fee'],//充值金额
+                                'keyword2' => $message['time_end'],//充值时间
+                                'keyword3' => '微信支付',//充值方式
+                                'keyword4' => $balance,//当前余额
+                                'remark' => '澳莱芙球馆感谢您的惠顾！',
+                            ];
+                            app(Wechat::class)->sendTempMsg($message['openid'], $temp_id, $data);
+
+                            //如果绑定了手机号，发个短信通知下
+                            $user = User::query()->where('id', $order->user_id)->first();
+                            if ($user && $user->mobile_no) {
+                                $result = EasySms::send($user->mobile_no, [
+                                    'template' => 'SMS_156280288',
+                                    'data' => [
+                                        'money' => $message['total_fee'],
+                                        'name' => $user->nickname,
+                                        'balance' => $balance
+                                    ],
+                                ]);
+                                Log::info('sms_code_result', $result);
+                            }
                         }
 
                         // 订场订单
@@ -158,6 +226,40 @@ class PaymentController extends ApiController
                             $order->items->each(function ($item) {
                                 $item->field_profile->update(['amount' => 0]);
                             });
+
+                            //订场成功后，发送短信或者微信模板消息
+                            $day = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'day');
+                            $msg = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'msg');
+                            $type = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'type');
+                            $field_info = '日期为' . $day . '，时段' . $msg;
+
+                            $user = User::query()->where('id', $order->user_id)->first();
+                            $temp_id = 's3hPD_voLenSUxpnsgh8o68TiAcLbFZEdaRlSQMrKjI';
+                            $data = [
+                                'first' => '尊敬的' . $user->nickname . '，您的订场已成功。',
+                                'keyword1' => '深圳澳莱芙球馆',//场馆名称
+                                'keyword2' => '室内' . $type == 1 ? '羽毛球' : '篮球',//消费项目
+                                'keyword3' => $field_info,//场地信息
+                                'keyword4' => $message['total_fee'],//付款金额
+                                'remark' => '澳莱芙球馆感谢您的惠顾！',
+                            ];
+                            app(Wechat::class)->sendTempMsg($message['openid'], $temp_id, $data);
+
+                            //如果绑定了手机号，发个短信通知下
+                            if ($user && $user->mobile_no) {
+                                $result = EasySms::send($user->mobile_no, [
+                                    'template' => 'SMS_156280001',
+                                    'data' => [
+                                        'name' => $user->nickname,
+                                        'activity' => '室内' . $type == 1 ? '羽毛球' : '篮球',
+                                        'date' => $day,
+                                        'time' => $field_info
+                                    ],
+                                ]);
+                                Log::info('sms_code_result', $result);
+                            }
+                            //发完信息，删除redis中的信息
+                            Redis::del([OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id]);
                         }
                     }
 
