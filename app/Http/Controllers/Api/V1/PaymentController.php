@@ -71,43 +71,55 @@ class PaymentController extends ApiController
 
         $order = Order::query()->find($request->input('order_id'));
         //订场成功后，发送短信或者微信模板消息
-        $day = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'day');
-        $msg = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'msg');
-        $type = Redis::hget(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 'type');
+        $msg_arr = Redis::lrange(OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id, 0, -1);
         //用完了就删掉，删除redis中的信息
         Redis::del([OrderService::RESERVE_FIELD_INFO_MSG_KEY . $order->id]);
-        $field_info = '日期为' . $day . '，时段' . $msg;
 
         $user = User::query()->where('id', $order->user_id)->first();
+
+        //TODO 这里的通知使用laravel的通知功能实现
+        #region 微信模板消息
+        $field_info = '';
+        end($msg_arr);
+        $key_last = key($msg_arr);
+        foreach ($msg_arr as $k => $msg) {
+            $msg = json_decode($msg, true);
+            $type = $type ?? ($msg['type'] == 1 ? '羽毛球' : '篮球');
+            $field_info .= $msg['field_name'] . ' ' . $msg['date'] . ' ' . $msg['time'] . '；' . ($k == $key_last ? '' : PHP_EOL);
+        }
         $temp_id = 's3hPD_voLenSUxpnsgh8o68TiAcLbFZEdaRlSQMrKjI';
         $data = [
             'first' => '尊敬的' . $user->nickname . '，您的订场已成功。',
             'keyword1' => '深圳澳莱芙球馆',//场馆名称
-            'keyword2' => '室内' . $type == 1 ? '羽毛球' : '篮球',//消费项目
+            'keyword2' => '室内' . $type . '馆',//消费项目
             'keyword3' => $field_info,//场地信息
             'keyword4' => $order->total_fees,//付款金额
-            'remark' => '澳莱芙球馆感谢您的惠顾！',
+            'remark' => '感谢您的光临，如需咨询请拨打18680254124秦教练。',
         ];
         app(Wechat::class)->sendTempMsg($user->openid, $temp_id, $data);
-
+        #endregion
 
         //如果绑定了手机号，发个短信通知下
-        try{
-            if ($user && $user->mobile_no) {
-                $result = EasySms::send($user->mobile_no, [
-                    'template' => 'SMS_156280001',
-                    'data' => [
-                        'name' => $user->nickname,
-                        'activity' => '室内' . $type == 1 ? '羽毛球' : '篮球',
-                        'date' => $day,
-                        'time' => $msg
-                    ],
-                ]);
-                Log::info('sms_code_result', $result);
-            }
-        }catch (NoGatewayAvailableException $exception){
-            Log::info('sms_send_err',$exception->getExceptions());
-        }
+        #region 发短信
+        // try {
+        //     if ($user && $user->mobile_no) {
+        //         foreach ($msg_arr as $msg) {
+        //             $msg = json_decode($msg, true);
+        //             EasySms::send($user->mobile_no, [
+        //                 'template' => 'SMS_156280001',
+        //                 'data' => [
+        //                     'name' => $msg['name'],
+        //                     'activity' => $msg['activity'],
+        //                     'date' => $msg['date'],
+        //                     'time' => $msg['time'],
+        //                 ],
+        //             ]);
+        //         }
+        //     }
+        // } catch (NoGatewayAvailableException $exception) {
+        //     Log::info('sms_send_err', $exception->getMessage());
+        // }
+        #endregion
 
         return $this->success($data, '支付成功');
     }

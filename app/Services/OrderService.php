@@ -43,9 +43,6 @@ class OrderService
 
             $total_fees = 0;
 
-            $sms_msg = '';
-            $day = '';
-            $count = count($field_profile_id_arr);
             foreach ($field_profile_id_arr as $k => $v) {
                 $total_fees += $v['fees'];
                 //检查场馆
@@ -58,7 +55,7 @@ class OrderService
                 }
 
                 $day = week_day_map()[$v['weekday']];
-                $time_end = sprintf("%02d", $v['time'] + 1) . ':00:00';//1小时过期
+                $time_end = sprintf("%02d", $v['time'] + 1) . ':00';//1小时过期
 
                 $item = $order->items()->make([
                     'field_profile_id' => $v['id'],
@@ -69,18 +66,20 @@ class OrderService
                 ]);
                 $item->save();
 
-                $time_start = sprintf("%02d", $v['time']) . ':00:00';
+                $time_start = sprintf("%02d", $v['time']) . ':00';
 
-                $sms_msg .= $time_start . '-' . $time_end . '（' . $v['name'] . '）' . ($k == $count - 1 ? '；' : '、');//10:00-11:00（场地1）、10:00-12:00（场地2）；
+                $data = [
+                    'name' => $user->nickname,
+                    'activity' => '室内' . ($type == 1 ? '羽毛球' : '篮球') . $v['name'],
+                    'date' => $day . week_map(date('w', strtotime($day))),
+                    'time' => $time_start . '-' . $time_end,
+                    'field_name' => $v['name'],
+                    'type' => $type,
+                ];
+                Redis::lpush(self::RESERVE_FIELD_INFO_MSG_KEY . $order->id, json_encode($data));
             }
 
-            Redis::hmset(self::RESERVE_FIELD_INFO_MSG_KEY . $order->id, [
-                'day' => $day,
-                'msg' => $sms_msg,
-                'type' => $type
-            ]);
-
-
+            //订场订单，更新订单的总金额
             if ($type == Order::ORDER_TYPE_RESERVE) {
                 $order->update([
                     'total_fees' => $total_fees
