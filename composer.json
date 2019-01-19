@@ -6,11 +6,19 @@
     "type": "project",
     "require": {
         "php": ">=7.0.0",
+        "encore/laravel-admin": "^1.6",
         "fideloper/proxy": "~3.3",
         "laravel/framework": "5.5.*",
-        "laravel/tinker": "~1.0"
+        "laravel/passport": "~4.0",
+        "laravel/tinker": "~1.0",
+        "mews/captcha": "^2.2",
+        "overtrue/easy-sms": "^1.1",
+        "overtrue/laravel-wechat": "~4.0",
+        "paragonie/random_compat": "~2.0",
+        "predis/predis": "^1.1"
     },
     "require-dev": {
+        "barryvdh/laravel-cors": "^0.11.2",
         "filp/whoops": "~2.0",
         "fzaninotto/faker": "~1.4",
         "mockery/mockery": "~1.0",
@@ -24,7 +32,10 @@
         ],
         "psr-4": {
             "App\\": "app/"
-        }
+        },
+        "files":[
+            "app/Extends/helper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
