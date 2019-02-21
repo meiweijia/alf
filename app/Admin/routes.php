@@ -15,7 +15,8 @@ Route::group([
     $router->resource('setting/fields', 'FieldController');
     $router->resource('setting/field_profiles', 'FieldProfileController');
     $router->resource('setting/orders', 'OrderController');
+    $router->resource('setting/wechat_menus', 'WechatMenuController');
+
     $router->get('setting/badminton', 'ReserveController@badminton');
     $router->get('setting/basketball', 'ReserveController@basketball');
-
 });

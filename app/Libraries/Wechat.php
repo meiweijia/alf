@@ -4,6 +4,7 @@ namespace App\Libraries;
 
 
 use App\Models\User;
+use App\Models\WechatMenu;
 use Illuminate\Http\Request;
 use EasyWeChat\Kernel\Messages\Text;
 use Illuminate\Support\Facades\Auth;
@@ -155,4 +156,62 @@ class Wechat
         return $app->template_message->send($send);
     }
 
+    /**
+     * create wechat menu
+     *
+     * @return mixed
+     */
+    public function createMenu()
+    {
+        $app = EasyWechat::officialAccount();
+        $app->menu->delete();
+        return $app->menu->create($this->buildNestedArray());
+    }
+
+    /**
+     * Build Nested array.
+     *
+     * @param array $nodes
+     * @param int $parentId
+     *
+     * @return array
+     */
+    protected function buildNestedArray(array $nodes = [], $parentId = 0)
+    {
+        $branch = [];
+
+        if (empty($nodes)) {
+            $nodes = WechatMenu::query()
+                ->select('name', 'type', 'value', 'parent_id', 'id')
+                ->orderBy('order')
+                ->get()
+                ->toArray();
+        }
+
+        foreach ($nodes as $k => $node) {
+            if ($node['parent_id'] == $parentId) {
+                $children = $this->buildNestedArray($nodes, $node['id']);
+                switch ($node['type']){
+                    case 0:
+                        $node['key'] = $node['value'];
+                        break;
+                    case 1:
+                        $node['url'] = $node['value'];
+                        break;
+                }
+                $node['type'] = WechatMenu::$typeMap[$node['type']];
+                unset($node['value']);
+                unset($node['id']);
+                unset($node['parent_id']);
+                if ($children) {
+                    $node['sub_button'] = $children;
+                    unset($node['type']);
+                    unset($node['value']);
+                }
+                $branch[] = $node;
+            }
+        }
+
+        return $branch;
+    }
 }
