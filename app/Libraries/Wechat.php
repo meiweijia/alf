@@ -33,7 +33,7 @@ class Wechat
                 case 'event':
                     switch ($message['Event']) {
                         case 'subscribe':
-                            return new Text('欢迎关注 ' . $name . '！');
+                            return new Text($name);
                             break;
                     }
             }
