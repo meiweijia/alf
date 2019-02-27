@@ -84,12 +84,10 @@ class UserController extends Controller
         $grid->id('Id');
         $grid->mobile_no('手机号');
         $grid->nickname('昵称');
-        $grid->sex('状态')->display(function ($value) {
+        $grid->sex('性别')->display(function ($value) {
             return $value ? ($value == 1 ? '男' : '女') : '未知';
         });
-        $grid->city('城市');
-        $grid->province('省份');
-        $grid->country('国家');
+        $grid->column('profile.balance','余额');
         $grid->created_at('Created at');
 
         $grid->disableCreateButton();
