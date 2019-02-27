@@ -94,6 +94,18 @@ class UserController extends Controller
         $grid->disableActions();
         $grid->disableRowSelector();
 
+        $grid->filter(function($filter){
+            $filter->expand();
+            // 去掉默认的id过滤器
+            $filter->disableIdFilter();
+
+            $filter->column(6, function ($filter) {
+                $filter->like('mobile_no', '手机号');
+            });
+            // 在这里添加字段过滤器
+
+        });
+
         return $grid;
     }
 
