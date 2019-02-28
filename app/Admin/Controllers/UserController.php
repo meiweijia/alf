@@ -4,11 +4,13 @@ namespace App\Admin\Controllers;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Models\UserProfile;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -87,14 +89,13 @@ class UserController extends Controller
         $grid->sex('性别')->display(function ($value) {
             return $value ? ($value == 1 ? '男' : '女') : '未知';
         });
-        $grid->column('profile.balance','余额');
+        $grid->column('profile.balance', '余额');
         $grid->created_at('Created at');
 
         $grid->disableCreateButton();
-        $grid->disableActions();
         $grid->disableRowSelector();
 
-        $grid->filter(function($filter){
+        $grid->filter(function ($filter) {
             $filter->expand();
             // 去掉默认的id过滤器
             $filter->disableIdFilter();
@@ -102,8 +103,15 @@ class UserController extends Controller
             $filter->column(6, function ($filter) {
                 $filter->like('mobile_no', '手机号');
             });
-            // 在这里添加字段过滤器
+        });
 
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+            $actions->disableEdit();
+            // append一个操作
+            $id = $this->getKey();
+            $actions->append('<a href="javascript:recharge(' . $id . ')"><i class="fa fa-plus"></i>充值</a>');
         });
 
         return $grid;
@@ -160,5 +168,13 @@ class UserController extends Controller
         $form->text('unionid', 'Unionid');
 
         return $form;
+    }
+
+    public function recharge(Request $request)
+    {
+        $user_id = $request->input('user_id');
+        $amount = $request->input('amount');
+
+        return UserProfile::query()->where('user_id', $user_id)->increment('balance', $amount * 100);
     }
 }
