@@ -53,7 +53,7 @@ class ReserveController extends Controller
         );
 
         // 填充页面body部分，这里可以填入任何可被渲染的对象
-        $content->body('<iframe src="http://sports.mjmhu.cn/homeselectOptPage" frameborder="0" width="100%" height="980px" name="main"></iframe>');
+        $content->body('<iframe name="main1" src="http://sports.mjmhu.cn/homeselectOptPage" frameborder="0" width="100%" height="980px"></iframe>');
 
         return $content;
     }
@@ -71,7 +71,7 @@ class ReserveController extends Controller
         );
 
         // 填充页面body部分，这里可以填入任何可被渲染的对象
-        $content->body('<iframe src="http://sports.mjmhu.cn/homeselectOptPages" frameborder="0" width="100%" height="980px" name="main"></iframe>');
+        $content->body('<iframe name="main2" src="http://sports.mjmhu.cn/homeselectOptPages" frameborder="0" width="100%" height="980px"></iframe>');
 
         return $content;
     }
